@@ -1,0 +1,8 @@
+*.jpg
+*.png
+*.csv
+*.json
+**/.ipynb_checkpoints
+*.pyc
+*.h5
+**/models
