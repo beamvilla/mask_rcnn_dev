@@ -4,3 +4,4 @@
 *.json
 **/.ipynb_checkpoints
 *.pyc
+**/trained_models

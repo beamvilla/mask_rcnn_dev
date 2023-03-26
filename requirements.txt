@@ -1,7 +1,6 @@
 scikit-image==0.16.2
 h5py==2.10.0
 matplotlib
-pandas
 datetime
 pytest-shutil
 keras==2.2.5
