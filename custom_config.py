@@ -9,6 +9,8 @@ with open("./config/mrcnn_config.json") as configFile:
 with open("./config/training.json") as configFile:
       TRAINING_CONFIG = json.load(configFile)
 
+with open("./config/eval.json") as configFile:
+      EVAL_CONFIG = json.load(configFile)
 
 class CustomConfig(Config):
       """
@@ -66,6 +68,19 @@ class TrainingConfig:
       MODEL_CHECKPOINT_MONITOR = TRAINING_CONFIG["params"]["model_checkpoint_monitor"]
       MODEL_CHECKPOINT_MODE = TRAINING_CONFIG["params"]["model_checkpoint_mode"]
 
+class EvalCoonfig:
+      COLORS = EVAL_CONFIG["mask_color"]
+      for obj, color in COLORS.items():
+            COLORS[obj] = tuple(color)
+
+      DEVICE = EVAL_CONFIG["device"]
+      IMAGE_DIR = EVAL_CONFIG["image_dir"]
+      LABEL_DIR = EVAL_CONFIG["label_dir"]
+      CLASSES_MAP_PATH = EVAL_CONFIG["classes_map_path"]
+      TEST_SET = EVAL_CONFIG["test_set"]
+      IOU_THRESHOLD = EVAL_CONFIG["iou_threshold"]
+
 
 mrcnn_config = CustomConfig()
 training_config = TrainingConfig()
+eval_config = EvalCoonfig()

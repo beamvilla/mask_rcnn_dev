@@ -6,3 +6,4 @@
 *.pyc
 **/trained_models
 *.h5
+*.ipynb
