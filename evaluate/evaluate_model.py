@@ -42,6 +42,7 @@ def evaluate(image_dir, annotations, confusion_scores_dict, model, classes_map, 
             gt_mask=gt_masks,
             objects=gt_objects,
             save_pred_dir=save_pred_dir,
+            colors=colors,
             image_file_name=image_file_name.split(".")[0] + "_gt.png"
         )
         # Visualize prediction
