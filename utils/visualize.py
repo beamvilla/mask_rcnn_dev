@@ -114,7 +114,6 @@ def visualize_gt_mask_on_image(gt_image, gt_mask, objects, save_pred_dir, image_
       for verts in contours:
         # Subtract the padding and flip (y, x) to (x, y)
         verts = np.fliplr(verts) - 1
-        print(f"color : {colors[label]}")
         p = Polygon(verts, facecolor="none", edgecolor=colors[label])
         ax.add_patch(p)
         

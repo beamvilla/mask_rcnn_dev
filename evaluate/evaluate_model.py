@@ -37,6 +37,19 @@ def evaluate(image_dir, annotations, confusion_scores_dict, model, classes_map, 
             pred_obj_names.append(classes_map_id[id])
 
         # Visualize ground-truth
+        display_instances(
+                            image=gt_image, 
+                            boxes=None, 
+                            masks=gt_masks, 
+                            obj_names=gt_objects, 
+                            colors=colors,
+                            title="Ground-Truth",
+                            scores=None, 
+                            apply_box=False,
+                            save_pred_dir=save_pred_dir,
+                            image_file_name=image_file_name.split(".")[0] + "_gt.png"
+                        )
+        """
         visualize_gt_mask_on_image(
             gt_image=gt_image,
             gt_mask=gt_masks,
@@ -45,6 +58,7 @@ def evaluate(image_dir, annotations, confusion_scores_dict, model, classes_map, 
             colors=colors,
             image_file_name=image_file_name.split(".")[0] + "_gt.png"
         )
+        """
         # Visualize prediction
         display_instances(
                             image=gt_image, 
