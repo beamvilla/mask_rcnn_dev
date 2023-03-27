@@ -54,7 +54,7 @@ class CustomConfig(Config):
 
 class TrainingConfig:
       DATASET_DIR = TRAINING_CONFIG["dataset"]["dataset_dir"]
-      LABEL_DIR = TRAINING_CONFIG["dataset"]["dataset_dir"]
+      LABEL_DIR = TRAINING_CONFIG["dataset"]["label_dir"]
 
       TRAINABLE_LAYERS = TRAINING_CONFIG["model"]["trainable_layers"]
       INITIALIZE_WEIGHT = TRAINING_CONFIG["model"]["initialize_weight"]
