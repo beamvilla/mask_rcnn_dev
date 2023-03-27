@@ -2680,7 +2680,9 @@ class MaskRCNN():
                                         histogram_freq=0, write_graph=True, write_images=False),
             keras.callbacks.ModelCheckpoint(
                             f"{checkpoint_name}_{self.epoch:04d}.h5", 
+                            verbose=0,
                             save_best_only=True, 
+                            save_weights_only=True,
                             monitor=checkpoint_monitor, 
                             mode=checkpoint_mode
                         )
