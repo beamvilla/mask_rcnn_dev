@@ -70,6 +70,3 @@ def eval(weight_path, checkpoint_name):
 
     confusion_df.to_csv(os.path.join(SAVE_PRED_DIR, f"{checkpoint_name}_confusion_matrix.csv"))
     recall_and_precision_metric.to_csv(os.path.join(SAVE_PRED_DIR, f"{checkpoint_name}_pr_metrics.csv"))
-
-eval(weight_path="./trained_models/mobilenetv1_20230326_032912_trained/mask_rcnn_512_object_0048.h5",
-     checkpoint_name="mobilenetv1_20230326_032912")
