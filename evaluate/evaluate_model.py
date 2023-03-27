@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import sys
 sys.path.append("..")
 
-from utils.visualize import display_instances, visualize_gt_mask_on_image
+from utils.visualize import display_instances
 from evaluate.ground_truth import extract_anno_gt
 from evaluate.metrics import cal_confusion_matrix
 
@@ -49,16 +49,7 @@ def evaluate(image_dir, annotations, confusion_scores_dict, model, classes_map, 
                             save_pred_dir=save_pred_dir,
                             image_file_name=image_file_name.split(".")[0] + "_gt.png"
                         )
-        """
-        visualize_gt_mask_on_image(
-            gt_image=gt_image,
-            gt_mask=gt_masks,
-            objects=gt_objects,
-            save_pred_dir=save_pred_dir,
-            colors=colors,
-            image_file_name=image_file_name.split(".")[0] + "_gt.png"
-        )
-        """
+       
         # Visualize prediction
         display_instances(
                             image=gt_image, 

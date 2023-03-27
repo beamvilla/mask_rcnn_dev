@@ -90,36 +90,3 @@ def display_instances(image, boxes, masks, obj_names, colors,
                 pad_inches=-0.5,
                 orientation="landscape")
     plt.show()
-
-
-def visualize_gt_mask_on_image(gt_image, gt_mask, objects, save_pred_dir, image_file_name, colors, title="Ground-truth"):
-    _, ax = plt.subplots(1, figsize=(16,16))
-
-    height, width = gt_image.shape[:2]
-    ax.set_ylim(height + 10, -10)
-    ax.set_xlim(-10, width + 10)
-    ax.axis("off")
-    ax.set_title(title)
-
-    masked_image = gt_image.astype(np.uint32).copy()
-
-    for idx in range(len(objects)):
-      mask = gt_mask[:, :, idx]
-      # Mask Polygon
-      # Pad to ensure proper polygons for masks that touch image edges.
-      padded_mask = np.zeros((mask.shape[0] + 2, mask.shape[1] + 2), dtype=np.uint8)
-      padded_mask[1:-1, 1:-1] = mask
-      contours = find_contours(padded_mask, 0.5)
-      label = objects[idx]
-      for verts in contours:
-        # Subtract the padding and flip (y, x) to (x, y)
-        verts = np.fliplr(verts) - 1
-        p = Polygon(verts, facecolor="none", edgecolor=colors[label])
-        ax.add_patch(p)
-        
-    ax.imshow(masked_image.astype(np.uint8))
-    plt.savefig(os.path.join(save_pred_dir, image_file_name),
-                bbox_inches="tight", 
-                pad_inches=-0.5,
-                orientation="landscape")
-    plt.show() 
