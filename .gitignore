@@ -7,3 +7,4 @@
 **/trained_models
 *.h5
 *.ipynb
+manual_pipline.py
