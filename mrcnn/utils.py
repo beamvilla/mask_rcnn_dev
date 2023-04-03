@@ -24,6 +24,7 @@ from zipfile import ZipFile
 from six.moves import urllib
 import shutil
 import warnings
+from distutils.version import LooseVersion
 
 # debugging
 import logging
@@ -104,16 +105,14 @@ def compute_overlaps(boxes1, boxes2):
 
 
 def compute_overlaps_masks(masks1, masks2):
-    '''Computes IoU overlaps between two sets of masks.
+    """Computes IoU overlaps between two sets of masks.
     masks1, masks2: [Height, Width, instances]
-    '''
-    #print("mask1: ", masks1) #DEBUGGING
-    #print("mask2: ", masks2) #DEBUGGING
-    # Condition for empty prediction
-    if not masks1.size:
-        return np.array([[0.]])
-
-    # flatten masks
+    """
+    # If either set of masks is empty return empty result
+    if masks1.shape[-1] == 0 or masks2.shape[-1] == 0:
+        return np.zeros((masks1.shape[-1], masks2.shape[-1]))
+    
+    # flatten masks and compute their areas
     masks1 = np.reshape(masks1 > .5, (-1, masks1.shape[-1])).astype(np.float32)
     masks2 = np.reshape(masks2 > .5, (-1, masks2.shape[-1])).astype(np.float32)
     area1 = np.sum(masks1, axis=0)
@@ -123,7 +122,6 @@ def compute_overlaps_masks(masks1, masks2):
     intersections = np.dot(masks1.T, masks2)
     union = area1[:, None] + area2[None, :] - intersections
     overlaps = intersections / union
-    #print("overlaps: ", overlaps) #DEBUGGING
     return overlaps
 
 
@@ -464,9 +462,8 @@ def resize_image(image, min_dim=None, max_dim=None, min_scale=None, mode="square
 
     # Resize image using bilinear interpolation
     if scale != 1:
-        image = skimage.transform.resize(
-            image, (round(h * scale), round(w * scale)),
-            order=1, mode="constant", preserve_range=True)
+        image = resize(image, (round(h * scale), round(w * scale)),
+                       preserve_range=True)
 
     # Need padding or cropping?
     if mode == "square":
@@ -550,7 +547,7 @@ def minimize_mask(bbox, mask, mini_shape):
         if m.size == 0:
             raise Exception("Invalid bounding box with area of zero")
         # Resize with bilinear interpolation
-        m = skimage.transform.resize(m, mini_shape, order=1, mode="constant")
+        m = resize(m, mini_shape)
         mini_mask[:, :, i] = np.around(m).astype(np.bool)
     return mini_mask
 
@@ -568,7 +565,7 @@ def expand_mask(bbox, mini_mask, image_shape):
         h = y2 - y1
         w = x2 - x1
         # Resize with bilinear interpolation
-        m = skimage.transform.resize(m, (h, w), order=1, mode="constant")
+        m = resize(m, (h, w))
         mask[y1:y2, x1:x2, i] = np.around(m).astype(np.bool)
     return mask
 
@@ -588,7 +585,7 @@ def unmold_mask(mask, bbox, image_shape):
     """
     threshold = 0.5
     y1, x1, y2, x2 = bbox
-    mask = skimage.transform.resize(mask, (y2 - y1, x2 - x1), order=1, mode="constant")
+    mask = resize(mask, (y2 - y1, x2 - x1))
     mask = np.where(mask >= threshold, 1, 0).astype(np.bool)
 
     # Put the mask in the right location.
@@ -729,7 +726,7 @@ def compute_matches(gt_boxes, gt_class_ids, gt_masks,
         # 3. Find the match
         for j in sorted_ixs:
             # If ground truth box is already matched, go to next one
-            if gt_match[j] > 0:
+            if gt_match[j] > -1:
                 continue
             # If we reach IoU smaller than the threshold, end the loop
             iou = overlaps[i, j]
@@ -894,14 +891,10 @@ def norm_boxes(boxes, shape):
     Returns:
         [N, (y1, x1, y2, x2)] in normalized coordinates
     """
-    boxes = boxes.astype(np.float32)
+    #boxes = boxes.astype(np.float32)
     h, w = shape
-    #print("norm_boxes (h,w): ",h,w) #DEBUGGING
     scale = np.array([h - 1, w - 1, h - 1, w - 1])
     shift = np.array([0, 0, 1, 1])
-    #print("boxes: ", boxes) #DEBUGGING
-    #print("boxes-shift: ", boxes - shift) #DEBUGGING
-    #print("normed boxes: ", np.divide((boxes - shift), scale).astype(np.float32)) #DEBUGGING
     return np.divide((boxes - shift), scale).astype(np.float32)
 
 
@@ -916,11 +909,34 @@ def denorm_boxes(boxes, shape):
     Returns:
         [N, (y1, x1, y2, x2)] in pixel coordinates
     """
-    boxes = boxes.astype(np.float32)
+    #boxes = boxes.astype(np.float32)
     h, w = shape
     scale = np.array([h - 1, w - 1, h - 1, w - 1])
     shift = np.array([0, 0, 1, 1])
     return np.around(np.multiply(boxes, scale) + shift).astype(np.int32)
+
+def resize(image, output_shape, order=1, mode='constant', cval=0, clip=True,
+           preserve_range=False, anti_aliasing=False, anti_aliasing_sigma=None):
+    """A wrapper for Scikit-Image resize().
+
+    Scikit-Image generates warnings on every call to resize() if it doesn't
+    receive the right parameters. The right parameters depend on the version
+    of skimage. This solves the problem by using different parameters per
+    version. And it provides a central place to control resizing defaults.
+    """
+    if LooseVersion(skimage.__version__) >= LooseVersion("0.14"):
+        # New in 0.14: anti_aliasing. Default it to False for backward
+        # compatibility with skimage 0.13.
+        return skimage.transform.resize(
+            image, output_shape,
+            order=order, mode=mode, cval=cval, clip=clip,
+            preserve_range=preserve_range, anti_aliasing=anti_aliasing,
+            anti_aliasing_sigma=anti_aliasing_sigma)
+    else:
+        return skimage.transform.resize(
+            image, output_shape,
+            order=order, mode=mode, cval=cval, clip=clip,
+            preserve_range=preserve_range)
 
 
 ############################################################
