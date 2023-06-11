@@ -77,3 +77,14 @@ def eval(weight_path, checkpoint_name,
 
     confusion_df.to_csv(os.path.join(SAVE_PRED_DIR, f"{checkpoint_name}_confusion_matrix.csv"))
     recall_and_precision_metric.to_csv(os.path.join(SAVE_PRED_DIR, f"{checkpoint_name}_pr_metrics.csv"))
+
+    print("\n\n========= PARAMS ===============")
+    print(f"conf : {mrcnn_config.DETECTION_MIN_CONFIDENCE}")
+    print(f"iou : {IOU_THRESHOLD}")
+    print(f"max bbox ooverlap : {MAX_BBOX_OVERLAP}")
+
+    print("\n\n========= CONFUSION MATRIX ===============")
+    print(confusion_df)
+
+    print("\n\n========= SCORES ===============")
+    print(recall_and_precision_metric)
