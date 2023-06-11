@@ -3,11 +3,10 @@ import json
 import tensorflow as tf
 import pandas as pd
 
-from custom_config import mrcnn_config
 from mrcnn import model as modellib
 from evaluate.evaluate_model import evaluate
 from evaluate.metrics import export_metric_result
-from custom_config import eval_config
+from custom_config import eval_config, mrcnn_config
 
 
 def eval(weight_path, checkpoint_name):

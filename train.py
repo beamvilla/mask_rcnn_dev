@@ -19,7 +19,7 @@ def train():
         weights_path = f"models/mask_rcnn_{training_config.INITIALIZE_WEIGHT}.h5"
         weight_type = training_config.INITIALIZE_WEIGHT
 
-    train_model_time = datetime.strftime(datetime.now() + timedelta(hours=7),'%Y%m%d_%H%M%S')
+    train_model_time = datetime.strftime(datetime.now() + timedelta(hours=7),"%Y%m%d_%H%M%S")
     save_trained_model_dir = f"trained_models/{train_model_time}"
     checkpoint_name = f"{mrcnn_config.BACKBONE}_{weight_type}_{training_config.TRAINABLE_LAYERS}_{train_model_time}"
     save_history_path = f"{save_trained_model_dir}/{checkpoint_name}.csv"
