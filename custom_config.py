@@ -92,7 +92,7 @@ class TrainingConfig:
 
 
 class EvalCoonfig:
-      def __init__(self, config_path="./config/eval.json"):
+      def __init__(self, config_path):
             print(config_path)
             exit()
             with open(config_path) as configFile:
