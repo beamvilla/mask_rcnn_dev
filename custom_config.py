@@ -9,6 +9,8 @@ with open("./config/eval.json") as configFile:
 
 class CustomConfig(Config):
       def __init__(self, config_path="./config/mrcnn_config.json"):
+            print(config_path)
+            exit()
 
             with open(config_path) as configFile:
                   MRCNN_CONFIG = json.load(configFile)
