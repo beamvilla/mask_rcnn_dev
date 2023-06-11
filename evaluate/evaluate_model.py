@@ -1,9 +1,9 @@
 import os
-import matplotlib.pyplot as plt
 import sys
 sys.path.append("..")
 
 from utils.visualize import display_instances
+from utils.filter_overlap_defect import filter
 from evaluate.ground_truth import extract_anno_gt
 from evaluate.metrics import cal_confusion_matrix
 
@@ -32,7 +32,8 @@ def evaluate(image_dir, annotations, confusion_scores_dict, model, classes_map, 
         # Run object detection
         pred_results = model.detect([gt_image], verbose=1)
         pred_results = pred_results[0]
-      
+
+        pred_results = filter(pred_results)
         for id in pred_results["class_ids"]:
             pred_obj_names.append(classes_map_id[id])
 

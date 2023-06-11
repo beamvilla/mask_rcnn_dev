@@ -1,12 +1,20 @@
-from custom_config import eval_config, mrcnn_config
-from mrcnn import model as modellib
 import tensorflow as tf
 import os
 import json
 import skimage.draw
 
+from custom_config import EvalCoonfig, CustomConfig
+from mrcnn import model as modellib
+
 
 weight_path = "./trained_models/20230404_123755/mobilenetv1_mobile_heads_20230404_123755_0000.h5"
+weight_dir = "/".join(weight_path.split("/")[:-1])
+eval_config_path = os.path.join(weight_dir, "config", "eval.json")
+mrcnn_config_path = os.path.join(weight_dir, "config", "mrcnn_config.json")
+
+eval_config = EvalCoonfig(eval_config_path)
+mrcnn_config = CustomConfig(mrcnn_config_path)
+
 COLORS = eval_config.COLORS
 DEVICE = eval_config.DEVICE
 IMAGE_DIR = eval_config.IMAGE_DIR
