@@ -52,13 +52,14 @@ def filter(pred_results):
         filtered_rois.append(without_skin_rois[idx])
         filtered_class_ids.append(without_skin_class_ids[idx])
         filtered_scores.append(without_skin_scores[idx])
-        filtered_masks.append(without_skin_masks[idx])
+        filtered_masks.append(without_skin_masks[:, :, idx])
         
     filtered_rois.extend(skin_rois)
     filtered_class_ids.extend(skin_class_ids)
     filtered_scores.extend(skin_scores)
     filtered_masks.extend(skin_masks)
 
+    filtered_masks = np.moveaxis(filtered_masks, -1, 0)
     filtered_pred_results = {
         "rois": np.array(filtered_rois),
         "class_ids": np.array(filtered_class_ids),
