@@ -80,8 +80,8 @@ def eval(weight_path, checkpoint_name,
 
     print("\n\n========= PARAMS ===============")
     print(f"conf : {mrcnn_config.DETECTION_MIN_CONFIDENCE}")
-    print(f"iou : {IOU_THRESHOLD}")
     print(f"max bbox ooverlap : {MAX_BBOX_OVERLAP}")
+    print(f"iou : {IOU_THRESHOLD}")
 
     print("\n\n========= CONFUSION MATRIX ===============")
     print(confusion_df)
