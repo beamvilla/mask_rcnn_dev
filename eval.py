@@ -10,8 +10,8 @@ from custom_config import EvalCoonfig, CustomConfig
 
 
 def eval(weight_path, checkpoint_name, 
-         eval_config_path="./config/eval.json",
-         mrcnn_config_path="./config/mrcnn_config.json"):
+         eval_config_path,
+         mrcnn_config_path):
     
     eval_config = EvalCoonfig(eval_config_path)
     mrcnn_config = CustomConfig(mrcnn_config_path)
