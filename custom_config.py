@@ -1,4 +1,5 @@
 import json
+import numpy as np
 
 from mrcnn.config import Config
 
@@ -49,6 +50,24 @@ class CustomConfig(Config):
 
             self.IMAGE_MAX_DIM = MRCNN_CONFIG["IMAGE_MAX_DIM"]
             self.IMAGE_MIN_DIM = MRCNN_CONFIG["IMAGE_MIN_DIM"]
+
+            """Set values of computed attributes."""
+            # Effective batch size
+            self.BATCH_SIZE = self.IMAGES_PER_GPU * self.GPU_COUNT
+
+            # Input image size
+            if self.IMAGE_RESIZE_MODE == "crop":
+                  self.IMAGE_SHAPE = np.array([self.IMAGE_MIN_DIM, self.IMAGE_MIN_DIM, 3])
+            else:
+                  self.IMAGE_SHAPE = np.array([self.IMAGE_MAX_DIM, self.IMAGE_MAX_DIM, 3])
+
+            # Image meta data length
+            # See compose_image_meta() for details
+            self.IMAGE_META_SIZE = 1 + 3 + 3 + 4 + 1 + self.NUM_CLASSES
+
+            # Add Resolution to config name
+            self.NAME = "{}_".format(self.IMAGE_MAX_DIM)+self.NAME
+      
 
 
 class TrainingConfig:
