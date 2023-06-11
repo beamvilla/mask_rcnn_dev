@@ -3,7 +3,7 @@ import numpy as np
 from utils.non_max_suppression import non_max_suppression
 
 
-def filter(pred_results):
+def filter(pred_results, max_bbox_overlap=0.75):
     skin_id = 1
     n_skin = 0
 
@@ -52,7 +52,7 @@ def filter(pred_results):
 
     filtered_ids = non_max_suppression(
                     boxes=without_skin_rois,
-                    max_bbox_overlap=0.75,
+                    max_bbox_overlap=max_bbox_overlap,
                     scores=without_skin_scores
                 )
 
@@ -68,7 +68,7 @@ def filter(pred_results):
         filtered_scores.append(skin_scores[i])
         filtered_masks[:, :, nxt] = skin_masks[:, :, i]
         nxt += 1
-        
+
     for idx in filtered_ids:
         filtered_rois.append(without_skin_rois[idx])
         filtered_class_ids.append(without_skin_class_ids[idx])

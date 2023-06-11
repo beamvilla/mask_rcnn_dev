@@ -8,7 +8,7 @@ from evaluate.ground_truth import extract_anno_gt
 from evaluate.metrics import cal_confusion_matrix
 
 
-def evaluate(image_dir, annotations, confusion_scores_dict, model, classes_map, colors, save_pred_dir, iou_threshold=0.5):
+def evaluate(image_dir, annotations, confusion_scores_dict, model, classes_map, colors, save_pred_dir, iou_threshold=0.5, max_bbox_overlap=0.75):
     classes_map_id = {}
     for class_name, class_id in classes_map.items():
         classes_map_id[class_id] = class_name
@@ -32,7 +32,7 @@ def evaluate(image_dir, annotations, confusion_scores_dict, model, classes_map, 
         # Run object detection
         pred_results = model.detect([gt_image], verbose=1)
         pred_results = pred_results[0]
-        pred_results = filter(pred_results)
+        pred_results = filter(pred_results, max_bbox_overlap)
 
         for id in pred_results["class_ids"]:
             pred_obj_names.append(classes_map_id[id])

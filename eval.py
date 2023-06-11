@@ -31,6 +31,7 @@ def eval(weight_path, checkpoint_name,
     CLASSES_MAP_PATH = eval_config.CLASSES_MAP_PATH
     TEST_SET = eval_config.TEST_SET
     IOU_THRESHOLD = eval_config.IOU_THRESHOLD
+    MAX_BBOX_OVERLAP = eval_config.MAX_BBOX_OVERLAP
 
     ANNOTATIONS = json.load(open(os.path.join(LABEL_DIR, TEST_SET, f"{TEST_SET}_label.json")))
     CLASSES_MAP = json.load(open(CLASSES_MAP_PATH))
@@ -65,7 +66,8 @@ def eval(weight_path, checkpoint_name,
                               classes_map=CLASSES_MAP,
                               colors=COLORS,
                               save_pred_dir=SAVE_PRED_DIR,
-                              iou_threshold=IOU_THRESHOLD
+                              iou_threshold=IOU_THRESHOLD,
+                              max_bbox_overlap=MAX_BBOX_OVERLAP
                             )
     confusion_df, recall_and_precision_metric = export_metric_result(
                                                       confusion_scores_dict=confusion_scores_dict,
