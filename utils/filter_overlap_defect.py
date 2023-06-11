@@ -25,12 +25,12 @@ def filter(pred_results):
             without_skin_rois.append(pred_results["rois"][i])
             without_skin_class_ids.append(pred_results["class_ids"][i])
             without_skin_scores.append(pred_results["scores"][i])
-            without_skin_masks.append(pred_results["masks"][i])
+            without_skin_masks.append(pred_results["masks"][:, :, i])
         else:
             skin_rois.append(pred_results["rois"][i])
             skin_class_ids.append(pred_results["class_ids"][i])
             skin_scores.append(pred_results["scores"][i])
-            skin_masks.append(pred_results["masks"][i])
+            skin_masks.append(pred_results["masks"][:, :, i])
 
     without_skin_rois = np.array(without_skin_rois)
     without_skin_class_ids = np.array(without_skin_class_ids)
