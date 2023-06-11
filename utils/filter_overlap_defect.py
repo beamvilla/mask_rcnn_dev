@@ -62,18 +62,18 @@ def filter(pred_results):
     filtered_masks = np.zeros((h, w, c))
 
     nxt = 0
-    for idx in filtered_ids:
-        filtered_rois.append(without_skin_rois[idx])
-        filtered_class_ids.append(without_skin_class_ids[idx])
-        filtered_scores.append(without_skin_scores[idx])
-        filtered_masks[:, :, nxt] = without_skin_masks[:, :, idx]
-        nxt += 1
-
     for i in range(len(skin_rois)):
         filtered_rois.append(skin_rois[i])
         filtered_class_ids.append(skin_class_ids[i])
         filtered_scores.append(skin_scores[i])
         filtered_masks[:, :, nxt] = skin_masks[:, :, i]
+        nxt += 1
+        
+    for idx in filtered_ids:
+        filtered_rois.append(without_skin_rois[idx])
+        filtered_class_ids.append(without_skin_class_ids[idx])
+        filtered_scores.append(without_skin_scores[idx])
+        filtered_masks[:, :, nxt] = without_skin_masks[:, :, idx]
         nxt += 1
 
     filtered_pred_results = {
