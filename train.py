@@ -5,8 +5,11 @@ from datetime import datetime, timedelta
 
 from mrcnn import model as modellib
 from model_trainer.prepare_dataset import CustomDataset
-from custom_config import mrcnn_config, training_config
+from custom_config import CustomConfig, TrainingConfig
 
+
+training_config = TrainingConfig()
+mrcnn_config = CustomConfig()
 
 def train():
     with open("./trained_models/classes_map.json") as classesMap:

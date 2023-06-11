@@ -6,10 +6,16 @@ import pandas as pd
 from mrcnn import model as modellib
 from evaluate.evaluate_model import evaluate
 from evaluate.metrics import export_metric_result
-from custom_config import eval_config, mrcnn_config
+from custom_config import EvalCoonfig, CustomConfig
 
 
-def eval(weight_path, checkpoint_name):
+def eval(weight_path, checkpoint_name, 
+         eval_config_path="./config/eval.json",
+         mrcnn_config_path="./config/mrcnn_config.json"):
+    
+    eval_config = EvalCoonfig(eval_config_path)
+    mrcnn_config = CustomConfig(mrcnn_config_path)
+    
     CONFUSION_IDX_LIST = [
                             (0, 0), (0, 1), (0, 2), (0, 4),
                             (1, 0), (1, 1), (1, 2), (1, 3),
