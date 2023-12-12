@@ -1,9 +1,28 @@
 import json
 import os
+import argparse
 
 
-PATH = "./roseapple_new_dataset_label_16032023/test/test_label.json"
-IMAGE_DIR = "./roseapple_new_dataset_05122021"
+# Initialize parser
+parser = argparse.ArgumentParser()
+ 
+# Adding optional argument
+parser.add_argument("-project", "--project", help="Project name")
+parser.add_argument("-subset", "--subset", help="Subset name")
+parser.add_argument("-label_source_dir", "--label_source_dir", help="Label source directory.", default="./roseapple_new_dataset_label_16032023/")
+parser.add_argument("-image_dir", "--image_dir", help="Image directory.", default="./roseapple_new_dataset_05122021")
+
+# Read arguments from command line
+args = parser.parse_args()
+
+project = args.project
+subset = args.subset
+label_source_dir = args.label_source_dir
+image_dir = args.image_dir
+
+
+PATH = os.path.join(label_source_dir, project, f"{subset}_label.json")
+
 
 with open(PATH) as f:
     labels = json.load(f)
@@ -36,7 +55,7 @@ via_format = {
             "default_filepath": ""
         },
         "project": {
-            "name": "test_set"
+            "name": f"{project}_via"
         }
     },
     "_via_img_metadata": {},
@@ -62,7 +81,7 @@ via_format = {
 region_name = list(via_format["_via_attributes"]["region"].keys())[0]
 for filename, attr in labels.items():
     regions = []
-    image_path = os.path.join(IMAGE_DIR, filename)
+    image_path = os.path.join(image_dir, filename)
     image_size = os.path.getsize(image_path)
     image_key = filename + str(image_size)
 

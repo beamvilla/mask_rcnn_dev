@@ -2,7 +2,7 @@ import json
 
 
 DATASET_TYPE = "test"
-LABEL_FILE_PATH = f"./roseapple_new_dataset_label_16032023/{DATASET_TYPE}/{DATASET_TYPE}_set_fixed_via_format.json"
+LABEL_FILE_PATH = f"./roseapple_new_dataset_label_16032023/{DATASET_TYPE}/{DATASET_TYPE}_set_fixed_20112023_via.json"
 RE_FORMAT_LABEL_FILE_PATH = f"./roseapple_new_dataset_label_16032023/{DATASET_TYPE}/{DATASET_TYPE}_label.json"
 
 with open(LABEL_FILE_PATH) as labelFile:
