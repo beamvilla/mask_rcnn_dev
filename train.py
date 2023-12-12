@@ -33,15 +33,15 @@ def train():
 
     ## ======================= PREPARE DATASET =======================
     # Training dataset.
+    label_path = training_config.LABEL_PATH
+
     dataset_train = CustomDataset()
-    train_anno_dir = f"{training_config.LABEL_DIR}/train/train_label.json"
-    dataset_train.load_custom(training_config.DATASET_DIR, train_anno_dir, classes_map)
+    dataset_train.load_custom(training_config.DATASET_DIR, label_path["train"], classes_map)
     dataset_train.prepare()
 
     # Validation dataset
     dataset_val = CustomDataset()
-    val_anno_dir = f"{training_config.LABEL_DIR}/val/val_label.json"
-    dataset_val.load_custom(training_config.DATASET_DIR, val_anno_dir, classes_map)
+    dataset_val.load_custom(training_config.DATASET_DIR, label_path["val"], classes_map)
     dataset_val.prepare()
 
     ## ======================= CALLBACKS =======================

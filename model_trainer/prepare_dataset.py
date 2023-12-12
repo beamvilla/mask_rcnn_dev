@@ -5,27 +5,40 @@ import os
 import json
 import skimage.draw
 import numpy as np
+from typing import Dict
 
 from mrcnn import utils
 
 
 class CustomDataset(utils.Dataset):
-    def load_custom(self, dataset_dir, annotation_dir, classes_map):
+    def load_custom(
+        self, 
+        dataset_dir: str, 
+        annotation_path: str, 
+        classes_map: Dict[str, int]
+    ) -> None:
         cnt_classes = {}
         for class_name, class_id in classes_map.items():
             cnt_classes[class_name] = 0
             self.add_class("object", class_id, class_name)
         
-        with open(annotation_dir) as annoFile:
+        with open(annotation_path) as annoFile:
             annotations = json.load(annoFile)
 
-        # Add images
-        for image_file_name, anno_data in annotations.items():
-            objects = anno_data["objects"]
-            num_ids = [classes_map[a] for a in objects]
+        img_metadata = annotations["_via_img_metadata"]
 
-            for obj in objects:
-                cnt_classes[obj] += 1
+        # Add images
+        for _, metadata in img_metadata.items():
+            num_ids = []
+            polygons = []
+            image_file_name = metadata["filename"]
+            regions = metadata["regions"]
+
+            for region in regions:
+                polygons.append(region["shape_attributes"])
+                for region_attr in region["region_attributes"].values():
+                    cnt_classes[region_attr] += 1
+                    num_ids.append(classes_map[region_attr])
 
             image_path = os.path.join(dataset_dir, image_file_name)
             image = skimage.io.imread(image_path)
@@ -36,9 +49,9 @@ class CustomDataset(utils.Dataset):
                 image_id=image_file_name,  # use file name as a unique image id
                 path=image_path,
                 width=width, height=height,
-                polygons=anno_data["polygons"],
+                polygons=polygons,
                 num_ids=num_ids
-                )
+            )
             
         print(cnt_classes)
 

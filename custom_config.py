@@ -75,7 +75,7 @@ class TrainingConfig:
                   TRAINING_CONFIG = json.load(configFile)
 
             self.DATASET_DIR = TRAINING_CONFIG["dataset"]["dataset_dir"]
-            self.LABEL_DIR = TRAINING_CONFIG["dataset"]["label_dir"]
+            self.LABEL_PATH = TRAINING_CONFIG["dataset"]["label_path"]
 
             self.TRAINABLE_LAYERS = TRAINING_CONFIG["model"]["trainable_layers"]
             self.INITIALIZE_WEIGHT = TRAINING_CONFIG["model"]["initialize_weight"]
@@ -104,7 +104,7 @@ class EvalCoonfig:
 
             self.DEVICE = EVAL_CONFIG["device"]
             self.IMAGE_DIR = EVAL_CONFIG["image_dir"]
-            self.LABEL_DIR = EVAL_CONFIG["label_dir"]
+            self.LABEL_PATH = EVAL_CONFIG["label_path"]
             self.CLASSES_MAP_PATH = EVAL_CONFIG["classes_map_path"]
             self.TEST_SET = EVAL_CONFIG["test_set"]
             self.IOU_THRESHOLD = EVAL_CONFIG["iou_threshold"]

@@ -27,13 +27,12 @@ def eval(weight_path, checkpoint_name,
     COLORS = eval_config.COLORS
     DEVICE = eval_config.DEVICE
     IMAGE_DIR = eval_config.IMAGE_DIR
-    LABEL_DIR = eval_config.LABEL_DIR
+    LABEL_PATH = eval_config.LABEL_PATH
     CLASSES_MAP_PATH = eval_config.CLASSES_MAP_PATH
-    TEST_SET = eval_config.TEST_SET
     IOU_THRESHOLD = eval_config.IOU_THRESHOLD
     MAX_BBOX_OVERLAP = eval_config.MAX_BBOX_OVERLAP
 
-    ANNOTATIONS = json.load(open(os.path.join(LABEL_DIR, TEST_SET, f"{TEST_SET}_label.json")))
+    ANNOTATIONS = json.load(open(LABEL_PATH))
     CLASSES_MAP = json.load(open(CLASSES_MAP_PATH))
 
     MODEL_DIR = ("/").join(weight_path.split("/")[:-1])
