@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from mrcnn import model as modellib
 from model_trainer.prepare_dataset import CustomDataset
-from custom_config import CustomConfig, TrainingConfig
+from custom_config import CustomConfig, TrainingConfig, dir_path
 
 
 training_config = TrainingConfig()
@@ -19,11 +19,11 @@ def train():
     weight_type = "retrain"
 
     if training_config.INITIALIZE_WEIGHT in ["coco", "balloon", "mobile"]:
-        weights_path = f"models/mask_rcnn_{training_config.INITIALIZE_WEIGHT}.h5"
+        weights_path = os.path.join(dir_path, f"models/mask_rcnn_{training_config.INITIALIZE_WEIGHT}.h5")
         weight_type = training_config.INITIALIZE_WEIGHT
 
     train_model_time = datetime.strftime(datetime.now() + timedelta(hours=7),"%Y%m%d_%H%M%S")
-    save_trained_model_dir = f"trained_models/{train_model_time}"
+    save_trained_model_dir = os.path.join(dir_path, f"trained_models/{train_model_time}")
     checkpoint_name = f"{mrcnn_config.BACKBONE}_{weight_type}_{training_config.TRAINABLE_LAYERS}_{train_model_time}"
     save_history_path = f"{save_trained_model_dir}/{checkpoint_name}.csv"
     checkpoint_path = f"{save_trained_model_dir}/{checkpoint_name}"

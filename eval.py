@@ -6,7 +6,7 @@ import pandas as pd
 from mrcnn import model as modellib
 from evaluate.evaluate_model import evaluate
 from evaluate.metrics import export_metric_result
-from custom_config import EvalCoonfig, CustomConfig
+from custom_config import EvalCoonfig, CustomConfig, dir_path
 
 
 def eval(
@@ -39,7 +39,7 @@ def eval(
     CLASSES_MAP = json.load(open(CLASSES_MAP_PATH))
 
     MODEL_DIR = ("/").join(weight_path.split("/")[:-1])
-    SAVE_PRED_DIR = f"{MODEL_DIR}/predictions"
+    SAVE_PRED_DIR = os.path.join(dir_path, f"{MODEL_DIR}/predictions")
 
     if not os.path.exists(SAVE_PRED_DIR):
        os.makedirs(SAVE_PRED_DIR)
