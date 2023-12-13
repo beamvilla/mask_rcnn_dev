@@ -12,7 +12,7 @@ training_config = TrainingConfig()
 mrcnn_config = CustomConfig()
 
 def train():
-    with open("./trained_models/classes_map.json") as classesMap:
+    with open(training_config.CLASSES_MAP_PATH) as classesMap:
         classes_map = json.load(classesMap)
 
     weights_path = training_config.INITIALIZE_WEIGHT
