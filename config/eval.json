@@ -1,0 +1,13 @@
+{
+    "image_dir": "/content/mask_rcnn_dev/dataset/images",
+    "label_path": "/content/mask_rcnn_dev/dataset/label/test/test.json",
+    "classes_map_path": "/content/mask_rcnn_dev/dataset/classes_map.json",
+    "device": "/gpu:0",
+    "mask_color": {
+            "skin": [1.0, 0.03, 0.00],
+            "minor": [0.21, 0.77, 0.74],
+            "critical": [0.99, 0.89, 0.02]
+        },
+    "iou_threshold": 0.5,
+    "max_bbox_overlap": 0.75
+}

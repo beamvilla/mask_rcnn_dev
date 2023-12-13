@@ -1,0 +1,22 @@
+{
+    "dataset": {
+        "dataset_dir": "/content/mask_rcnn_dev/dataset/images",
+        "label_path": {
+            "train": "/content/mask_rcnn_dev/dataset/label/train/train.json",
+            "val": "/content/mask_rcnn_dev/dataset/label/val/val.json"
+        },
+        "classes_map_path": "/content/mask_rcnn_dev/dataset/classes_map.json"
+    },
+    "model": {
+        "trainable_layers": "heads",
+        "initialize_weight": "coco"
+    },
+    "params": {
+        "epochs": 10,
+	"early_stopping_monitor": "val_loss",
+        "early_stopping_patience": 5,
+        "early_stopping_mode": "min",
+        "model_checkpoint_monitor": "val_loss",
+        "model_checkpoint_mode": "min"
+    }
+}

@@ -2,6 +2,7 @@
 *.png
 *.csv
 *.json
+!config/**
 **/.ipynb_checkpoints
 *.pyc
 **/trained_models
@@ -9,3 +10,4 @@
 *.ipynb
 manual_pipline.py
 *.zip
+*.deb
