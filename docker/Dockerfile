@@ -1,7 +1,10 @@
 FROM python:3.6.15-slim-buster
 WORKDIR /root
 
-RUN apt-get update && apt-get upgrade && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
+RUN apt-get update --yes --quiet \
+&& apt-get --yes --quiet upgrade \
+&& apt-get install --yes --quiet --no-install-recommends gcc \
+&& rm -rf /var/lib/apt/lists/*
 
 ADD /docker/requirements.txt /root/requirements.txt
 RUN pip3 install --user --no-cache-dir -r requirements.txt
