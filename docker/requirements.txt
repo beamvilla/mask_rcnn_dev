@@ -4,7 +4,6 @@ matplotlib
 datetime
 pytest-shutil
 tensorflow==1.15.0
-tensorflow-gpu==1.15.0
 keras==2.2.5
 jupyter
 protobuf==3.20.0
