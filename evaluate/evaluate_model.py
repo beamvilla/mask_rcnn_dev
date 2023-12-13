@@ -2,7 +2,7 @@ import os
 import sys
 sys.path.append("..")
 
-#from utils.visualize import display_instances
+from utils.visualize import display_instances
 from utils.filter_overlap_defect import filter
 from evaluate.ground_truth import extract_anno_gt
 from evaluate.metrics import cal_confusion_matrix
@@ -58,7 +58,6 @@ def evaluate(
             pred_obj_names.append(classes_map_id[id])
 
         # Visualize ground-truth
-        """
         display_instances(
                             image=gt_image, 
                             boxes=None, 
@@ -71,9 +70,8 @@ def evaluate(
                             save_pred_dir=save_pred_dir,
                             image_file_name=image_file_name.split(".")[0] + "_gt.png"
                         )
-        """
+
         # Visualize prediction
-        """
         display_instances(
                             image=gt_image, 
                             boxes=pred_results["rois"], 
@@ -85,7 +83,7 @@ def evaluate(
                             save_pred_dir=save_pred_dir,
                             image_file_name=image_file_name.split(".")[0] + "_pred.png"
                         )
-        """
+
         _ = cal_confusion_matrix(
                                     confusion_scores_dict=confusion_scores_dict, 
                                     pred_results=pred_results,
