@@ -4,5 +4,4 @@ matplotlib
 datetime
 pytest-shutil
 keras==2.2.5
-jupyter
-protobuf==3.20.0
+#protobuf==3.20.0
