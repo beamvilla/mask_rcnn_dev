@@ -107,6 +107,5 @@ class EvalCoonfig:
             self.IMAGE_DIR = EVAL_CONFIG["image_dir"]
             self.LABEL_PATH = EVAL_CONFIG["label_path"]
             self.CLASSES_MAP_PATH = EVAL_CONFIG["classes_map_path"]
-            self.TEST_SET = EVAL_CONFIG["test_set"]
             self.IOU_THRESHOLD = EVAL_CONFIG["iou_threshold"]
             self.MAX_BBOX_OVERLAP = EVAL_CONFIG["max_bbox_overlap"]
