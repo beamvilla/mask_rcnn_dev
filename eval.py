@@ -9,9 +9,12 @@ from evaluate.metrics import export_metric_result
 from custom_config import EvalCoonfig, CustomConfig
 
 
-def eval(weight_path, checkpoint_name, 
-         eval_config_path,
-         mrcnn_config_path):
+def eval(
+    weight_path: str, 
+    checkpoint_name: str, 
+    eval_config_path: str,
+    mrcnn_config_path: str
+  ) -> None:
     
     eval_config = EvalCoonfig(eval_config_path)
     mrcnn_config = CustomConfig(mrcnn_config_path)
