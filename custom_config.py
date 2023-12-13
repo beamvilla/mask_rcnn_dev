@@ -1,14 +1,17 @@
+import os
 import json
 import numpy as np
 
 from mrcnn.config import Config
 
 
-with open("./config/eval.json") as configFile:
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
+with open(os.path.join(dir_path, "config/eval.json")) as configFile:
       EVAL_CONFIG = json.load(configFile)
 
 class CustomConfig(Config):
-      def __init__(self, config_path="./config/mrcnn_config.json"):
+      def __init__(self, config_path=os.path.join(dir_path, "config/mrcnn_config.json")):
             with open(config_path) as configFile:
                   MRCNN_CONFIG = json.load(configFile)
             
@@ -70,7 +73,7 @@ class CustomConfig(Config):
 
 
 class TrainingConfig:
-      def __init__(self, config_path="./config/training.json"):
+      def __init__(self, config_path=os.path.join(dir_path, "config/training.json")):
             with open(config_path) as configFile:
                   TRAINING_CONFIG = json.load(configFile)
 
