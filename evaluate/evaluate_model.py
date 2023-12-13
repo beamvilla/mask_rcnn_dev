@@ -8,20 +8,40 @@ from evaluate.ground_truth import extract_anno_gt
 from evaluate.metrics import cal_confusion_matrix
 
 
-def evaluate(image_dir, annotations, confusion_scores_dict, model, classes_map, colors, save_pred_dir, iou_threshold=0.5, max_bbox_overlap=0.75):
+def evaluate(
+    image_dir, 
+    annotations, 
+    confusion_scores_dict, 
+    model, 
+    classes_map, 
+    colors, 
+    save_pred_dir, 
+    iou_threshold=0.5, 
+    max_bbox_overlap=0.75
+):
     classes_map_id = {}
     for class_name, class_id in classes_map.items():
         classes_map_id[class_id] = class_name
 
-    for image_file_name, anno_data in annotations.items():
-        print(f"[FILENAME]: {image_file_name}")
+    img_metadata = annotations["_via_img_metadata"]
+    for _, metadata in img_metadata.items():
+        gt_polygons = []
+        gt_objects = []
+
+        image_file_name = metadata["filename"]
+        regions = metadata["regions"]
+
+        print("[FILENAME]: " + image_file_name)
 
         image_path = os.path.join(image_dir, image_file_name)
         pred_obj_names = []
 
         # Import ground-truth image
-        gt_polygons = anno_data["polygons"]
-        gt_objects = anno_data["objects"]
+        for region in regions:
+            gt_polygons.append(region["shape_attributes"])
+            for region_attr in region["region_attributes"].values():
+                gt_objects.append(region_attr)
+
         gt_image, gt_masks, gt_label_ids = extract_anno_gt(
                                                             image_path=image_path, 
                                                             gt_polygons=gt_polygons, 
