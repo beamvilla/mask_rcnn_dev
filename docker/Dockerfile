@@ -1,4 +1,4 @@
-FROM python:3.6.15-slim-buster
+FROM tensorflow/tensorflow:1.15.3-py3
 WORKDIR /root
 
 RUN apt-get update --yes --quiet \
