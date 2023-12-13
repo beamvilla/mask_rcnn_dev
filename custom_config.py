@@ -76,7 +76,7 @@ class TrainingConfig:
 
             self.DATASET_DIR = TRAINING_CONFIG["dataset"]["dataset_dir"]
             self.LABEL_PATH = TRAINING_CONFIG["dataset"]["label_path"]
-            self.CLASSES_MAP_PATH = TRAINING_CONFIG["classes_map_path"]
+            self.CLASSES_MAP_PATH = TRAINING_CONFIG["dataset"]["classes_map_path"]
 
             self.TRAINABLE_LAYERS = TRAINING_CONFIG["model"]["trainable_layers"]
             self.INITIALIZE_WEIGHT = TRAINING_CONFIG["model"]["initialize_weight"]
