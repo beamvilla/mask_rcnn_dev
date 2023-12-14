@@ -3,9 +3,9 @@ import json
 import tensorflow as tf
 from datetime import datetime, timedelta
 
-from mrcnn import model as modellib
-from model_trainer.prepare_dataset import CustomDataset
-from custom_config import CustomConfig, TrainingConfig, dir_path
+from .mrcnn import model as modellib
+from .model_trainer.prepare_dataset import CustomDataset
+from .custom_config import CustomConfig, TrainingConfig, dir_path
 
 
 training_config = TrainingConfig()

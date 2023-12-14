@@ -2,7 +2,7 @@ import os
 import json
 import numpy as np
 
-from mrcnn.config import Config
+from .mrcnn.config import Config
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
