@@ -3,6 +3,7 @@ import shutil
 
 from train import train
 from eval import eval
+from custom_config import dir_path
 
 
 ## Train
@@ -13,12 +14,14 @@ for f in os.listdir(save_trained_model_dir):
         weight_path = os.path.join(save_trained_model_dir, f)
         break
 
-for f in os.listdir("./config"):
+config_dir = os.path.join(dir_path, "config")
+
+for f in os.listdir(config_dir):
     des_dir = os.path.join(save_trained_model_dir, "config")
     if not os.path.exists(des_dir):
         os.makedirs(des_dir)
 
-    shutil.copy(os.path.join("./config", f), os.path.join(des_dir, f))
+    shutil.copy(os.path.join(config_dir, f), os.path.join(des_dir, f))
 
 
 weight_dir = "/".join(weight_path.split("/")[:-1])

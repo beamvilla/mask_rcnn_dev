@@ -13,7 +13,7 @@
     },
     "params": {
         "epochs": 10,
-	"early_stopping_monitor": "val_loss",
+	    "early_stopping_monitor": "val_loss",
         "early_stopping_patience": 5,
         "early_stopping_mode": "min",
         "model_checkpoint_monitor": "val_loss",
