@@ -5,7 +5,7 @@ import tensorflow as tf
 from .mrcnn import model as modellib
 from .evaluate.evaluate_model import evaluate
 from .evaluate.metrics import export_metric_result
-from custom_config import EvalCoonfig, CustomConfig, dir_path
+from .custom_config import EvalCoonfig, CustomConfig, dir_path
 
 
 def eval(
