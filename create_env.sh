@@ -7,7 +7,7 @@ chmod +x Miniconda3-latest-Linux-x86_64.sh
 conda install -q -y --prefix /usr/local python=3.7 ujson
 conda install -y -c cudatoolkit=10.1
 cp /content/drive/MyDrive/libcudnn7_7.6.5.32-1+cuda10.0_amd64.deb .
-sudo dpkg -i /content/drive/MyDrive/libcudnn7_7.6.5.32-1+cuda10.1_amd64.deb
+sudo dpkg -i /content/drive/MyDrive/libcudnn7_7.6.5.32-1+cuda10.0_amd64.deb
 python3 /content/mask_rcnn_dev/activate_conda.py
 python --version
 sudo apt install unzip
