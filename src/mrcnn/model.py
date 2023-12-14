@@ -32,8 +32,7 @@ import keras.models as KM
 ROOT_DIR = os.path.abspath("../")
 
 # Import Mask RCNN
-sys.path.append(ROOT_DIR)  # To find local version of the library
-from mrcnn import utils
+from . import utils
 
 # Requires TensorFlow 1.3+ and Keras 2.0.8+.
 from distutils.version import LooseVersion

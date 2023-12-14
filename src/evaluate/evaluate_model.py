@@ -2,10 +2,10 @@ import os
 import sys
 sys.path.append("..")
 
-from utils.visualize import display_instances
-from utils.filter_overlap_defect import filter
-from evaluate.ground_truth import extract_anno_gt
-from evaluate.metrics import cal_confusion_matrix
+from src.utils.visualize import display_instances
+from src.utils.filter_overlap_defect import filter
+from src.evaluate.ground_truth import extract_anno_gt
+from src.evaluate.metrics import cal_confusion_matrix
 
 
 def evaluate(

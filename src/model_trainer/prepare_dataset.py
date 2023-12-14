@@ -7,7 +7,7 @@ import skimage.draw
 import numpy as np
 from typing import Dict
 
-from mrcnn import utils
+from src.mrcnn import utils
 
 
 class CustomDataset(utils.Dataset):

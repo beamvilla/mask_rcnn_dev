@@ -1,6 +1,6 @@
 import numpy as np
 
-from utils.non_max_suppression import non_max_suppression
+from .non_max_suppression import non_max_suppression
 
 
 def filter(pred_results, max_bbox_overlap=0.75):

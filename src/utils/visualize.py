@@ -1,5 +1,4 @@
 import os
-import cv2
 import numpy as np
 from skimage.measure import find_contours
 from matplotlib.patches import Polygon
