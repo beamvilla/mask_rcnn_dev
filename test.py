@@ -1,10 +1,9 @@
 import tensorflow as tf
 import os
-import json
 import skimage.draw
 
-from custom_config import EvalCoonfig, CustomConfig
-from mrcnn import model as modellib
+from src.custom_config import EvalCoonfig, CustomConfig
+from src.mrcnn import model as modellib
 
 
 weight_path = "./trained_models/20230404_123755/mobilenetv1_mobile_heads_20230404_123755_0000.h5"

@@ -1,9 +1,9 @@
 import os
 import shutil
 
-from train import train
-from eval import eval
-from custom_config import dir_path
+from src.train import train
+from src.eval import eval
+from src.custom_config import dir_path
 
 
 ## Train

@@ -1,7 +1,7 @@
 import os
 import argparse
 
-from eval import eval
+from src.eval import eval
  
  
 # Initialize parser

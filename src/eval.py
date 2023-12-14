@@ -1,7 +1,6 @@
 import os
 import json
 import tensorflow as tf
-import pandas as pd
 
 from mrcnn import model as modellib
 from evaluate.evaluate_model import evaluate
