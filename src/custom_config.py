@@ -6,6 +6,7 @@ from .mrcnn.config import Config
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
+dir_path = "/".join(dir_path.split("/")[:-1])
 
 with open(os.path.join(dir_path, "config/eval.json")) as configFile:
       EVAL_CONFIG = json.load(configFile)
