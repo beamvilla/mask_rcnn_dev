@@ -1,3 +1,4 @@
+from typing import List, Tuple
 import torch
 import sys
 sys.path.append("./")
@@ -17,26 +18,16 @@ from yolov5.utils.dataloaders import LoadImages
 class YOLODetection:
     def __init__(
         self, 
-        image_path: str,
         weight_path: str,
-        image_size: int = 640,
-        conf_thres: float = 0.25,
-        iou_thres: float = 0.5,
-        max_det: int = 20,
         dnn: bool = True,
         fp16: bool = False
     ) -> None:
         self.BATCH_SIZE = 1
 
-        self.image_path = image_path
         self.weight_path = weight_path
-        self.conf_thres = conf_thres
-        self.iou_thres = iou_thres
-        self.max_det = max_det
         self.dnn = dnn
         self.fp16 = fp16
         self.device = select_device("")
-        self.image_size = image_size
         self.load_model()
 
     def load_model(self) -> None:
@@ -48,19 +39,24 @@ class YOLODetection:
                         fp16=self.fp16
                     )
         
-    def detect(self):
+    def detect(self,
+        image_path: str,
+        image_size: List[int] = [640, 640],
+        conf_thres: float = 0.25,
+        iou_thres: float = 0.5,
+        max_det: int = 20
+    ) -> Tuple[List[float], List[float], List[int]]:
         stride, pt = self.model.stride, self.model.pt
-        self.image_size = check_img_size(self.image_size, s=stride)  # check image size
+        image_size = check_img_size(image_size, s=stride)  # check image size
         dataset = LoadImages(
-                    self.image_path, 
-                    img_size=self.image_size, 
+                    image_path, 
+                    img_size=image_size, 
                     stride=stride, 
                     auto=pt, 
                     vid_stride=1
                 )
 
         # Run inference
-        #model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
         dt = (Profile(), Profile(), Profile())
         for _, im, im0s, _, _ in dataset:
             with dt[0]:
@@ -78,9 +74,9 @@ class YOLODetection:
             with dt[2]:
                 pred = non_max_suppression(
                             prediction=pred, 
-                            conf_thres=self.conf_thres, 
-                            iou_thres=self.iou_thres, 
-                            max_det=self.max_det
+                            conf_thres=conf_thres, 
+                            iou_thres=iou_thres, 
+                            max_det=max_det
                         )
         
         bbox = []
@@ -98,6 +94,6 @@ class YOLODetection:
                 for *xyxy, conf, cls in reversed(det):
                     xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                     bbox.append(xywh)
-                    conf_scores.append(conf)
-                    classes.append(cls)
+                    conf_scores.append(conf.item())
+                    classes.append(int(cls.item()))
         return bbox, conf_scores, classes
