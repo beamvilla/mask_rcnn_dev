@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 
 def load_json_file(file_path: str) -> Dict[object, object]:
@@ -16,3 +16,8 @@ def save_json_output(data: Dict[Any, Any], output_path: str) -> None:
 
     with open(output_path, "w") as f:
         f.write(output_obj)
+
+def write_text_lines_file(lines: List[str], output_path: str) -> None:
+    with open(output_path, "w") as file:
+        file.writelines(lines)
+        file.close()
