@@ -3,7 +3,7 @@ import pandas as pd
 from typing import Dict
 
 
-def box_iou_calc(boxes1, boxes2):
+def box_iou_calc(boxes1: np.array, boxes2: np.array) -> np.array:
     # https://github.com/pytorch/vision/blob/master/torchvision/ops/boxes.py
     """
     Return intersection-over-union (Jaccard index) of boxes.
@@ -33,16 +33,16 @@ def box_iou_calc(boxes1, boxes2):
 
 
 class ConfusionMatrix:
-    def __init__(self, num_classes: int, conf_thres=0.3, iou_thres=0.5):
+    def __init__(self, num_classes: int, conf_thres=0.3, iou_thres=0.5) -> None:
         self.matrix = np.zeros((num_classes + 1, num_classes + 1))
         self.num_classes = num_classes
         self.CONF_THRESHOLD = conf_thres
         self.IOU_THRESHOLD = iou_thres
 
-    def process_batch(self, detections, labels: np.ndarray):
+    def process_batch(self, detections: np.ndarray, labels: np.ndarray) -> None:
         """
         Return intersection-over-union (Jaccard index) of boxes.
-        Both sets of boxes are expected to be in (x1, y1, x2, y2) format.
+        Both sets of boxes are expected to be in (x1, y1, x2, y2) format. >> int
         Arguments:
             detections (Array[N, 6]), x1, y1, x2, y2, conf, class
             labels (Array[M, 5]), class, x1, y1, x2, y2
