@@ -44,7 +44,7 @@ def union(a,b):
 def area(box1, box2):  # returns None if rectangles don't intersect
     dx = min(box1[2], box2[2]) - max(box1[0], box2[0])
     dy = min(box1[3], box2[3]) - max(box1[1], box2[1])
-    
+
     if (dx>=0) and (dy>=0):
         return dx * dy
     return 0.0
@@ -56,7 +56,7 @@ def combine_boxes(boxes, overlap_threshold=0.25):
 
     id = 0
 
-    while id < len(boxes): 
+    while id < len(boxes):
         combined = False
         for j in range(id + 1, len(boxes)):
             if area(boxes[id], boxes[j]) > overlap_threshold:
