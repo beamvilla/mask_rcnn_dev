@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def non_max_suppression(boxes, max_bbox_overlap=0.75, scores=None):
+def non_max_suppression(boxes, max_bbox_overlap=0.75):
     """Suppress overlapping detections.
     Original code from [1]_ has been adapted to include confidence score.
     .. [1] http://www.pyimagesearch.com/2015/02/16/faster-non-maximum-suppression-python/
@@ -38,12 +38,7 @@ def non_max_suppression(boxes, max_bbox_overlap=0.75, scores=None):
     y2 = boxes[:, 3]
 
     area = (x2 - x1 + 1) * (y2 - y1 + 1)
-    if scores is not None:
-        idxs = np.argsort(scores)
-    else:
-        idxs = np.argsort(y2)
-
-    idxs = idxs[np.where(scores[idxs] > 0.1)]
+    idxs = np.argsort(y2)
 
     while len(idxs) > 0:
         last = len(idxs) - 1
