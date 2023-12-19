@@ -59,7 +59,6 @@ class YOLODetection:
                     auto=pt, 
                     vid_stride=1
                 )
-
         # Run inference
         dt = (Profile(), Profile(), Profile())
         for _, im, im0s, _, _ in dataset:
@@ -79,16 +78,26 @@ class YOLODetection:
 
             # NMS
             with dt[2]:
-                pred = non_max_suppression(
-                            prediction=pred, 
-                            conf_thres=conf_thres, 
-                            iou_thres=iou_thres, 
-                            max_det=max_det
-                        )
+                if not self.mask:
+                    pred = non_max_suppression(
+                                prediction=pred, 
+                                conf_thres=conf_thres, 
+                                iou_thres=iou_thres, 
+                                max_det=max_det
+                            )
+                else:
+                    pred = non_max_suppression(
+                                prediction=pred, 
+                                conf_thres=conf_thres, 
+                                iou_thres=iou_thres, 
+                                max_det=max_det,
+                                nm=32
+                            )
         
         bbox = []
         conf_scores = []
         classes = []
+        masks = []
 
         for i, det in enumerate(pred):  # per image
             im0 = im0s.copy()
@@ -102,12 +111,14 @@ class YOLODetection:
                     segments = [
                         scale_segments(im.shape[2:], x, im0.shape, normalize=True)
                         for x in reversed(masks2segments(masks))]
-
-                for *xyxy, conf, cls in reversed(det):
+                _det = det
+                if self.mask:
+                    _det = det[:, :6]
+                for *xyxy, conf, cls in reversed(_det):
                     xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                     bbox.append(xywh)
                     conf_scores.append(conf.item())
                     classes.append(int(cls.item()))
         if self.mask:
-            bbox, segments, conf_scores, classes
+            return bbox, segments, conf_scores, classes
         return bbox, conf_scores, classes
