@@ -1,12 +1,16 @@
 import cv2
 import numpy as np
+from typing import Tuple
 
   
-def plot_masks(masks: np.array, image: np.array) -> np.array:
+def plot_masks(
+    masks: np.array, 
+    image: np.array,
+    color: Tuple[int, int, int] = (255, 0, 0),
+    isClosed: bool = True,
+    thickness: int = 1
+) -> np.array:
     for mask in masks:
-        isClosed = True
-        color = (255, 0, 0)
-        thickness = 2
         image = cv2.polylines(
                     image, 
                     np.int32([mask]), 
