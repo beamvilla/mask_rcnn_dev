@@ -98,6 +98,7 @@ class YOLODetection:
         conf_scores = []
         classes = []
         masks = []
+        segments = []
 
         for i, det in enumerate(pred):  # per image
             im0 = im0s.copy()
