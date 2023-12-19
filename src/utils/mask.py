@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
   
-def plot_masks(masks: np.array) -> np.array:
+def plot_masks(masks: np.array, image: np.array) -> np.array:
     for mask in masks:
         isClosed = True
         color = (255, 0, 0)
