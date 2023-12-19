@@ -1,0 +1,8 @@
+train: /content/yolo_dataset_augment/images/train/
+val: /content/yolo_dataset_augment/images/val/
+
+# number of classes
+nc: 2
+
+# class names
+names: ['skin', 'defect']

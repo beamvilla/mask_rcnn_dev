@@ -3,7 +3,7 @@ pip install virtualenv
 virtualenv myenv
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 chmod +x Miniconda3-latest-Linux-x86_64.sh
-./Miniconda3-latest-Linux-x86_64.sh -b -f -p /usr/local
+/content/Miniconda3-latest-Linux-x86_64.sh -b -f -p /usr/local
 conda install -q -y --prefix /usr/local python=3.7 ujson
 conda install -y -c conda-forge cudatoolkit=10.0
 cp /content/drive/MyDrive/libcudnn7_7.6.5.32-1+cuda10.0_amd64.deb .
