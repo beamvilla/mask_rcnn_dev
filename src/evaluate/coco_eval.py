@@ -17,7 +17,7 @@ def eval(
         raise ValueError(f"Not supported {detection_type}")
     
     coco_ground_truth = COCO(ground_truth_path)
-    coco_detection = COCO(detection_path)
+    coco_detection = coco_ground_truth.loadRes(detection_path)
 
     # running evaluation
     cocoEval = COCOeval(coco_ground_truth, coco_detection, "bbox")
