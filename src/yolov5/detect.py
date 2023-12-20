@@ -10,8 +10,10 @@ from yolov5.utils.general import (
     check_img_size, 
     non_max_suppression, 
     scale_boxes, 
-    xyxy2xywh
+    xyxy2xywh,
+    scale_segments
 )
+from yolov5.utils.segment.general import masks2segments, process_mask
 from yolov5.utils.dataloaders import LoadImages
 
 
@@ -20,13 +22,15 @@ class YOLODetection:
         self, 
         weight_path: str,
         dnn: bool = True,
-        fp16: bool = False
+        fp16: bool = False,
+        mask: bool = False
     ) -> None:
         self.BATCH_SIZE = 1
 
         self.weight_path = weight_path
         self.dnn = dnn
         self.fp16 = fp16
+        self.mask = mask
         self.device = select_device("")
         self.load_model()
 
@@ -55,7 +59,6 @@ class YOLODetection:
                     auto=pt, 
                     vid_stride=1
                 )
-
         # Run inference
         dt = (Profile(), Profile(), Profile())
         for _, im, im0s, _, _ in dataset:
@@ -68,32 +71,55 @@ class YOLODetection:
 
             # Inference
             with dt[1]:
-                pred = self.model(im, augment=False, visualize=False)
+                if self.mask:
+                    pred, proto = self.model(im, augment=False, visualize=False)[:2]
+                else:
+                    pred = self.model(im, augment=False, visualize=False)
 
             # NMS
             with dt[2]:
-                pred = non_max_suppression(
-                            prediction=pred, 
-                            conf_thres=conf_thres, 
-                            iou_thres=iou_thres, 
-                            max_det=max_det
-                        )
+                if not self.mask:
+                    pred = non_max_suppression(
+                                prediction=pred, 
+                                conf_thres=conf_thres, 
+                                iou_thres=iou_thres, 
+                                max_det=max_det
+                            )
+                else:
+                    pred = non_max_suppression(
+                                prediction=pred, 
+                                conf_thres=conf_thres, 
+                                iou_thres=iou_thres, 
+                                max_det=max_det,
+                                nm=32
+                            )
         
         bbox = []
         conf_scores = []
         classes = []
+        masks = []
+        segments = []
 
-        for det in pred:  # per image
+        for i, det in enumerate(pred):  # per image
             im0 = im0s.copy()
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
             
             if len(det):
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
-
-                for *xyxy, conf, cls in reversed(det):
+                if self.mask:
+                    masks = process_mask(proto[i], det[:, 6:], det[:, :4], im.shape[2:], upsample=True)  # HWC
+                    segments = [
+                        scale_segments(im.shape[2:], x, im0.shape, normalize=True)
+                        for x in reversed(masks2segments(masks))]
+                _det = det
+                if self.mask:
+                    _det = det[:, :6]
+                for *xyxy, conf, cls in reversed(_det):
                     xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                     bbox.append(xywh)
                     conf_scores.append(conf.item())
                     classes.append(int(cls.item()))
+        if self.mask:
+            return bbox, segments, conf_scores, classes
         return bbox, conf_scores, classes
