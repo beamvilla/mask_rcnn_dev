@@ -113,3 +113,37 @@ def not_in_area(
     if iou <= 0.0:
        is_not_in_area = True
     return is_not_in_area
+
+
+def extract_label_items(
+    label_path: str,
+    image_width: int,
+    image_height: int
+) -> Tuple[List[int], List[List[int]], List[List[int]]]:
+    with open(label_path) as file:
+        segmentations = []
+        boxes = []
+        class_ids = []
+        for line in file:
+            segmentation = []
+            line = line.rstrip()
+            all_x_y = line.split(" ")
+            _x = []
+            _y = []
+            increase = 0
+            class_ids.append(int(all_x_y[0]))
+
+            for _xy in all_x_y[1:]:
+              if increase % 2 == 0:
+                _xy = int(float(_xy) * image_width)
+                _x.append(_xy)
+              else:
+                _xy = int(float(_xy) * image_height)
+                _y.append(_xy)
+              segmentation.append(_xy)
+              increase += 1
+
+            segmentations.append(segmentation)
+            x, y, w, h = polygon_to_rect(polygon_x=_x, polygon_y=_y)
+            boxes.append([x, y, w, h])
+    return class_ids, segmentations, boxes
