@@ -54,14 +54,14 @@ def convert(annotations: Dict[object, object], mask=False) -> None:
     print("Done.")
 
 
-SUBSET = "test"
-ANNOTATIONS_PATH = f"./dataset/label/test/{SUBSET}.json"
+SUBSET = "train"
+ANNOTATIONS_PATH = f"./dataset/label/fixed_train_augment/{SUBSET}.json"
 IMAGE_DIR = "./dataset/images"
-OUTPUT_DIR  = "./yolo_dataset_augment_3_classes_mask"
+OUTPUT_DIR  = "./yolo_dataset_augment_2_classes_mask"
 CLASSES_MAP = {
     "skin"      : 0,
     "minor"     : 1,
-    "critical"  : 2
+    "critical"  : 1
 }
 
 image_output_dir = os.path.join(OUTPUT_DIR, "images", SUBSET)
