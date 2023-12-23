@@ -5,13 +5,8 @@ The main Mask R-CNN model implemenetation.
 Based on the work of Waleed Abdulla (Matterport)
 Modified by github.com/GustavZ
 """
-# python 2 compability
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 ## standard Mask R-CNN Imports
-import sys
 import os
 import random
 import datetime
@@ -22,11 +17,12 @@ from collections import OrderedDict
 import multiprocessing
 import numpy as np
 import tensorflow as tf
-import keras
-import keras.backend as K
-import keras.layers as KL
-import keras.engine as KE
-import keras.models as KM
+import tensorflow.keras as keras
+import tensorflow.keras.backend as K
+import tensorflow.keras.layers as KL
+import tensorflow.keras.utils as KU
+from tensorflow.python.eager import context
+import tensorflow.keras.models as KM
 
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../")
@@ -34,16 +30,17 @@ ROOT_DIR = os.path.abspath("../")
 # Import Mask RCNN
 from . import utils
 
-# Requires TensorFlow 1.3+ and Keras 2.0.8+.
+from tensorflow.compat.v1 import ConfigProto
+from tensorflow.compat.v1 import InteractiveSession
+config = ConfigProto() 
+config.gpu_options.allow_growth = True
+session = InteractiveSession(config=config)
+
+# Requires TensorFlow 2.0+
 from distutils.version import LooseVersion
-assert LooseVersion(tf.__version__) >= LooseVersion("1.3")
-assert LooseVersion(keras.__version__) >= LooseVersion('2.1.5')
+assert LooseVersion(tf.__version__) >= LooseVersion("2.0")
 
-## MobileNetV1 Imports
-import keras.regularizers as KR
-from keras.utils import conv_utils
-from keras.engine import InputSpec
-
+tf.compat.v1.disable_eager_execution()
 
 ############################################################
 #  Utility Functions
@@ -549,7 +546,7 @@ def clip_boxes_graph(boxes, window):
     return clipped
 
 
-class ProposalLayer(KE.Layer):
+class ProposalLayer(KL.Layer):
     """Receives anchor scores and selects a subset to pass as proposals
     to the second stage. Filtering is done based on anchor scores and
     non-max suppression to remove overlaps. It also applies bounding
@@ -623,6 +620,12 @@ class ProposalLayer(KE.Layer):
             return proposals
         proposals = utils.batch_slice([boxes, scores], nms,
                                       self.config.IMAGES_PER_GPU)
+        
+        if not context.executing_eagerly():
+            # Infer the static output shape:
+            out_shape = self.compute_output_shape(None)
+            proposals.set_shape(out_shape)
+
         return proposals
 
     def compute_output_shape(self, input_shape):
@@ -638,7 +641,7 @@ def log2_graph(x):
     return tf.log(x) / tf.log(2.0)
 
 
-class PyramidROIAlign(KE.Layer):
+class PyramidROIAlign(KL.Layer):
     """Implements ROI Pooling on multiple levels of the feature pyramid.
 
     Params:
@@ -692,7 +695,7 @@ class PyramidROIAlign(KE.Layer):
         pooled = []
         box_to_level = []
         for i, level in enumerate(range(2, 6)):
-            ix = tf.where(tf.equal(roi_level, level))
+            ix = tf.compat.v1.where(tf.equal(roi_level, level))
             level_boxes = tf.gather_nd(boxes, ix)
 
             # Box indicies for crop_and_resize.
@@ -820,14 +823,14 @@ def detection_targets_graph(proposals, gt_class_ids, gt_boxes, gt_masks, config)
     gt_boxes, non_zeros = trim_zeros_graph(gt_boxes, name="trim_gt_boxes")
     gt_class_ids = tf.boolean_mask(gt_class_ids, non_zeros,
                                    name="trim_gt_class_ids")
-    gt_masks = tf.gather(gt_masks, tf.where(non_zeros)[:, 0], axis=2,
+    gt_masks = tf.gather(gt_masks, tf.compat.v1.where(non_zeros)[:, 0], axis=2,
                          name="trim_gt_masks")
 
     # Handle COCO crowds
     # A crowd box in COCO is a bounding box around several instances. Exclude
     # them from training. A crowd box is given a negative class ID.
-    crowd_ix = tf.where(gt_class_ids < 0)[:, 0]
-    non_crowd_ix = tf.where(gt_class_ids > 0)[:, 0]
+    crowd_ix = tf.compat.v1.where(gt_class_ids < 0)[:, 0]
+    non_crowd_ix = tf.compat.v1.where(gt_class_ids > 0)[:, 0]
     crowd_boxes = tf.gather(gt_boxes, crowd_ix)
     gt_class_ids = tf.gather(gt_class_ids, non_crowd_ix)
     gt_boxes = tf.gather(gt_boxes, non_crowd_ix)
@@ -846,10 +849,10 @@ def detection_targets_graph(proposals, gt_class_ids, gt_boxes, gt_masks, config)
 
     # 1. Positive ROIs are those with >= 0.5 IoU with a GT box
     positive_roi_bool = (roi_iou_max >= 0.5)
-    positive_indices = tf.where(positive_roi_bool)[:, 0]
+    positive_indices = tf.compat.v1.where(positive_roi_bool)[:, 0]
 
     # 2. Negative ROIs are those with < 0.5 with every GT box. Skip crowds.
-    negative_indices = tf.where(tf.logical_and(roi_iou_max < 0.5, no_crowd_bool))[:, 0]
+    negative_indices = tf.compat.v1.where(tf.logical_and(roi_iou_max < 0.5, no_crowd_bool))[:, 0]
 
     # Subsample ROIs. Aim for 33% positive
     # Positive ROIs
@@ -861,7 +864,7 @@ def detection_targets_graph(proposals, gt_class_ids, gt_boxes, gt_masks, config)
     # Negative ROIs. Add enough to maintain positive:negative ratio.
     r = 1.0 / config.ROI_POSITIVE_RATIO
     negative_count = tf.cast(r * tf.cast(positive_count, tf.float32), tf.int32) - positive_count
-    negative_indices = tf.random_shuffle(negative_indices)[:negative_count]
+    negative_indices = tf.random.shuffle(negative_indices)[:negative_count]
     
     # Gather selected ROIs
     positive_rois = tf.gather(proposals, positive_indices)
@@ -926,7 +929,7 @@ def detection_targets_graph(proposals, gt_class_ids, gt_boxes, gt_masks, config)
     return rois, roi_gt_class_ids, deltas, masks
 
 
-class DetectionTargetLayer(KE.Layer):
+class DetectionTargetLayer(KL.Layer):
     """Subsamples proposals and generates target box refinement, class_ids,
     and masks for each.
 
@@ -1022,13 +1025,13 @@ def refine_detections_graph(rois, probs, deltas, window, config):
     # TODO: Filter out boxes with zero area
 
     # Filter out background boxes
-    keep = tf.where(class_ids > 0)[:, 0]
+    keep = tf.compat.v1.where(class_ids > 0)[:, 0]
     # Filter out low confidence boxes
     if config.DETECTION_MIN_CONFIDENCE:
-        conf_keep = tf.where(class_scores >= config.DETECTION_MIN_CONFIDENCE)[:, 0]
+        conf_keep = tf.compat.v1.where(class_scores >= config.DETECTION_MIN_CONFIDENCE)[:, 0]
         keep = tf.sets.set_intersection(tf.expand_dims(keep, 0),
                                         tf.expand_dims(conf_keep, 0))
-        keep = tf.sparse_tensor_to_dense(keep)[0]
+        keep = tf.sparse.to_dense(keep)[0]
 
     # Apply per-class NMS
     # 1. Prepare variables
@@ -1040,7 +1043,7 @@ def refine_detections_graph(rois, probs, deltas, window, config):
     def nms_keep_map(class_id):
         """Apply Non-Maximum Suppression on ROIs of the given class."""
         # Indices of ROIs of the given class
-        ixs = tf.where(tf.equal(pre_nms_class_ids, class_id))[:, 0]
+        ixs = tf.compat.v1.where(tf.equal(pre_nms_class_ids, class_id))[:, 0]
         # Apply NMS
         class_keep = tf.image.non_max_suppression(
                 tf.gather(pre_nms_rois, ixs),
@@ -1063,12 +1066,12 @@ def refine_detections_graph(rois, probs, deltas, window, config):
     
     # 3. Merge results into one list, and remove -1 padding
     nms_keep = tf.reshape(nms_keep, [-1])
-    nms_keep = tf.gather(nms_keep, tf.where(nms_keep > -1)[:, 0])
+    nms_keep = tf.gather(nms_keep, tf.compat.v1.where(nms_keep > -1)[:, 0])
     
     # 4. Compute intersection between keep and nms_keep
     keep = tf.sets.set_intersection(tf.expand_dims(keep, 0),
                                     tf.expand_dims(nms_keep, 0))
-    keep = tf.sparse_tensor_to_dense(keep)[0]
+    keep = tf.sparse.to_dense(keep)[0]
     
     # Keep top detections
     roi_count = config.DETECTION_MAX_INSTANCES
@@ -1081,7 +1084,7 @@ def refine_detections_graph(rois, probs, deltas, window, config):
     # Coordinates are normalized.
     detections = tf.concat([
         tf.gather(refined_rois, keep),
-        tf.to_float(tf.gather(class_ids, keep))[..., tf.newaxis],
+        tf.dtypes.cast(tf.gather(class_ids, keep), tf.float32)[..., tf.newaxis],
         tf.gather(class_scores, keep)[..., tf.newaxis]
         ], axis=1)
 
@@ -1091,7 +1094,7 @@ def refine_detections_graph(rois, probs, deltas, window, config):
     return detections
 
 
-class DetectionLayer(KE.Layer):
+class DetectionLayer(KL.Layer):
     """Takes classified proposal boxes and their bounding box deltas and
     returns the final detection boxes.
 
@@ -1270,7 +1273,10 @@ def fpn_classifier_graph(rois, feature_maps, image_meta,
                            name="mrcnn_bbox_fc")(shared)
     # Reshape to [batch, boxes, num_classes, (dy, dx, log(dh), log(dw))]
     s = K.int_shape(x)
-    mrcnn_bbox = KL.Reshape((s[1], num_classes, 4), name="mrcnn_bbox")(x)
+    if s[1] is None:
+        mrcnn_bbox = KL.Reshape((-1, num_classes, 4), name="mrcnn_bbox")(x)
+    else:
+        mrcnn_bbox = KL.Reshape((s[1], num_classes, 4), name="mrcnn_bbox")(x)
 
     return mrcnn_class_logits, mrcnn_probs, mrcnn_bbox
 
@@ -1391,7 +1397,7 @@ def rpn_class_loss_graph(rpn_match, rpn_class_logits):
     anchor_class = K.cast(K.equal(rpn_match, 1), tf.int32)
     # Positive and Negative anchors contribute to the loss,
     # but neutral anchors (match value = 0) don't.
-    indices = tf.where(K.not_equal(rpn_match, 0))
+    indices = tf.compat.v1.where(K.not_equal(rpn_match, 0))
     # Pick rows that contribute to the loss and filter out the rest.
     rpn_class_logits = tf.gather_nd(rpn_class_logits, indices)
     anchor_class = tf.gather_nd(anchor_class, indices)
@@ -1416,7 +1422,7 @@ def rpn_bbox_loss_graph(config, target_bbox, rpn_match, rpn_bbox):
     # Positive anchors contribute to the loss, but negative and
     # neutral anchors (match value of 0 or -1) don't.
     rpn_match = K.squeeze(rpn_match, -1)
-    indices = tf.where(K.equal(rpn_match, 1))
+    indices = tf.compat.v1.where(K.equal(rpn_match, 1))
 
     # Pick bbox deltas that contribute to the loss
     rpn_bbox = tf.gather_nd(rpn_bbox, indices)
@@ -1481,7 +1487,7 @@ def mrcnn_bbox_loss_graph(target_bbox, target_class_ids, pred_bbox):
 
     # Only positive ROIs contribute to the loss. And only
     # the right class_id of each ROI. Get their indicies.
-    positive_roi_ix = tf.where(target_class_ids > 0)[:, 0]
+    positive_roi_ix = tf.compat.v1.where(target_class_ids > 0)[:, 0]
     positive_roi_class_ids = tf.cast(
         tf.gather(target_class_ids, positive_roi_ix), tf.int64)
     indices = tf.stack([positive_roi_ix, positive_roi_class_ids], axis=1)
@@ -1519,7 +1525,7 @@ def mrcnn_mask_loss_graph(target_masks, target_class_ids, pred_masks):
 
     # Only positive ROIs contribute to the loss. And only
     # the class specific mask of each ROI.
-    positive_ix = tf.where(target_class_ids > 0)[:, 0]
+    positive_ix = tf.compat.v1.where(target_class_ids > 0)[:, 0]
     positive_class_ids = tf.cast(
         tf.gather(target_class_ids, positive_ix), tf.int64)
     indices = tf.stack([positive_ix, positive_class_ids], axis=1)
@@ -2302,7 +2308,16 @@ class MaskRCNN():
             # TODO: can this be optimized to avoid duplicating the anchors?
             anchors = np.broadcast_to(anchors, (config.BATCH_SIZE,) + anchors.shape)
             # A hack to get around Keras's bad support for constants
-            anchors = KL.Lambda(lambda x: tf.Variable(anchors), name="anchors")(input_image)
+            # This class returns a constant layer
+            class ConstLayer(tf.keras.layers.Layer):
+                def __init__(self, x, name=None):
+                    super(ConstLayer, self).__init__(name=name)
+                    self.x = tf.Variable(x)
+
+                def call(self, input):
+                    return self.x
+
+            anchors = ConstLayer(anchors, name="anchors")(input_image)
         else:
             anchors = input_anchors
 
@@ -2467,13 +2482,7 @@ class MaskRCNN():
 
     def load_weights(self, filepath, by_name=True, exclude=None):
         import h5py
-        # Conditional import to support versions of Keras before 2.2
-        # TODO: remove in about 6 months (end of 2018)
-        try:
-            from keras.engine import saving
-        except ImportError:
-            # Keras before 2.2 used the 'topology' namespace.
-            from keras.engine import topology as saving
+        from tensorflow.python.keras.saving import hdf5_format
 
         if exclude:
             by_name = True
@@ -2495,9 +2504,9 @@ class MaskRCNN():
             layers = filter(lambda l: l.name not in exclude, layers)
 
         if by_name:
-            saving.load_weights_from_hdf5_group_by_name(f, layers)
+            hdf5_format.load_weights_from_hdf5_group_by_name(f, layers)
         else:
-            saving.load_weights_from_hdf5_group(f, layers)
+            hdf5_format.load_weights_from_hdf5_group(f, layers)
         if hasattr(f, "close"):
             f.close()
 
@@ -2566,7 +2575,7 @@ class MaskRCNN():
         # Add L2 Regularization
         # Skip gamma and beta weights of batch normalization layers.
         reg_losses = [
-            KR.l2(self.config.WEIGHT_DECAY)(w) / tf.cast(tf.size(w), tf.float32)
+            keras.regularizers.l2(self.config.WEIGHT_DECAY)(w) / tf.cast(tf.size(w), tf.float32)
             for w in self.keras_model.trainable_weights
             if "gamma" not in w.name and "beta" not in w.name]
         self.keras_model.add_loss(tf.add_n(reg_losses))
@@ -2585,7 +2594,7 @@ class MaskRCNN():
             loss = (
                 tf.reduce_mean(layer.output, keepdims=True)
                 * self.config.LOSS_WEIGHTS.get(name, 1.))
-            self.keras_model.metrics_tensors.append(loss)
+            self.keras_model.add_metric(loss, name=name, aggregation='mean')
 
     def set_trainable(self, layer_regex, keras_model=None, indent=0, verbose=1):
         """Sets model layers as trainable if their names match
@@ -2613,7 +2622,7 @@ class MaskRCNN():
             if not layer.weights:
                 continue
             # Is it trainable?
-            trainable = bool(re.search(layer_regex, layer.name))
+            trainable = bool(re.fullmatch(layer_regex, layer.name))
             # Update layer. If layer is a container, update inner layer.
             if layer.__class__.__name__ == "TimeDistributed":
                 layer.layer.trainable = trainable
