@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 from typing import List, Dict
+from pathlib import Path
 import sys
 sys.path.append("./")
 
@@ -68,10 +69,47 @@ def get_n_images(labels_dir: str):
 
         print(subset, " contains ", n_image, " images.")
 
-SUBSETS = ["train"]
+def image_insight(dataset_dir: str):
+    classes_map_path = os.path.join(dataset_dir, "classes_map.json")
+    classes_map = load_json_file(classes_map_path)
+    classes_obj_max = {}
+
+    for classname in classes_map.keys():
+        classes_obj_max[classname] = 0
+
+    for folder in os.listdir(dataset_dir):
+        folder_path = os.path.join(dataset_dir, folder)
+        _folder_path = Path(folder_path)
+
+        if not _folder_path.is_dir():
+            continue
+
+        for subset in SUBSETS:
+            annotations_path = os.path.join(folder_path, "labels", subset, f"{subset}.json")
+            annotations = load_json_file(annotations_path)
+
+            images_metadata = annotations["_via_img_metadata"]
+            for _, metadata in images_metadata.items():
+                if len(metadata["regions"]) == 0:
+                    continue
+                
+                classes_obj_count = {}
+                for classname in classes_map.keys():
+                    classes_obj_count[classname] = 0
+
+                for region in metadata["regions"]:
+                    class_obj_name = list(region["region_attributes"].values())[0]
+                    classes_obj_count[class_obj_name] += 1
+                
+                if classes_obj_count[class_obj_name] > classes_obj_max[class_obj_name]:
+                    classes_obj_max[class_obj_name] = classes_obj_count[class_obj_name]
+    print(classes_obj_max)
+                
+
+SUBSETS = ["train", "test", "val"]
 labels_dir = "./dataset/white_bg/labels"
 #check_no_skin_object(labels_dir)
-get_n_images(labels_dir)
+#get_n_images(labels_dir)
 
 """
 check_duplicate_train_image(
@@ -79,3 +117,5 @@ check_duplicate_train_image(
     another_images_dir="./dataset/white_bg/images/test"
 )
 """
+
+image_insight("./dataset/23122023")
