@@ -33,7 +33,7 @@
     "MASK_POOL_SIZE": 14,
     "ROI_POSITIVE_RATIO": 0.33,
     "MEAN_PIXEL": [123.7, 116.8, 103.9],
-    "USE_MINI_MASK": true,
+    "USE_MINI_MASK": false,
     "MINI_MASK_SHAPE": [56, 56],
     "PRE_NMS_LIMIT": 6000,
     "FPN_CLASSIF_FC_LAYERS_SIZE": 1024,
