@@ -5,10 +5,6 @@ Display and Visualization Functions.
 Based on the work of Waleed Abdulla (Matterport)
 Modified by github.com/GustavZ
 """
-# python 2 compability
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import os
 import sys
