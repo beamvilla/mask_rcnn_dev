@@ -1640,7 +1640,7 @@ def load_image_gt(dataset, config, image_id, augment=False, augmentation=None,
     active_class_ids[source_class_ids] = 1
 
     # Resize masks to smaller size to reduce memory usage
-    if use_mini_mask:
+    if config.USE_MINI_MASK:
         mask = utils.minimize_mask(bbox, mask, config.MINI_MASK_SHAPE)
 
     # Image meta data
