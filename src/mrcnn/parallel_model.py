@@ -12,14 +12,10 @@ https://github.com/avolkov1/keras_experiments/blob/master/keras_exp/multigpu/
 https://github.com/fchollet/keras/blob/master/keras/utils/training_utils.py
 """
 # python 2 compability
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import tensorflow as tf
-import keras.backend as K
-import keras.layers as KL
-import keras.models as KM
+import tensorflow.keras.backend as K
+import tensorflow.keras.layers as KL
+import tensorflow.keras.models as KM
 
 import sys
 import os
@@ -126,9 +122,10 @@ if __name__ == "__main__":
 
     import os
     import numpy as np
-    import keras.optimizers
-    from keras.datasets import mnist
-    from keras.preprocessing.image import ImageDataGenerator
+    import tensorflow.keras.optimizers
+    from tensorflow.keras.datasets import mnist
+    from tensorflow.keras.preprocessing.image import ImageDataGenerator
+    from tensorflow import keras
 
     GPU_COUNT = 2
 
