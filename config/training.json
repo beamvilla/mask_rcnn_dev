@@ -2,6 +2,7 @@
     "dataset": {
         "dataset_dir": "/content/mask_rcnn_dev/dataset/23122023"
     },
+    "save_dir": "/content/drive/MyDrive/mask_rcnn_24122023",
     "model": {
         "trainable_layers": "all",
         "initialize_weight": "coco"

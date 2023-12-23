@@ -107,6 +107,8 @@ class TrainingConfig:
             self.DATASET_DIR = TRAINING_CONFIG["dataset"]["dataset_dir"]
             self.CLASSES_MAP_PATH = os.path.join(self.DATASET_DIR, "classes_map.json")
 
+            self.SAVE_DIR = TRAINING_CONFIG["save_dir"]
+
             self.TRAINABLE_LAYERS = TRAINING_CONFIG["model"]["trainable_layers"]
             self.INITIALIZE_WEIGHT = TRAINING_CONFIG["model"]["initialize_weight"]
 
