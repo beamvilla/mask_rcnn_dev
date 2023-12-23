@@ -1,14 +1,9 @@
 {
     "dataset": {
-        "dataset_dir": "/content/mask_rcnn_dev/dataset/images",
-        "label_path": {
-            "train": "/content/mask_rcnn_dev/dataset/label/train/train.json",
-            "val": "/content/mask_rcnn_dev/dataset/label/val/val.json"
-        },
-        "classes_map_path": "/content/mask_rcnn_dev/dataset/classes_map.json"
+        "dataset_dir": "/content/mask_rcnn_dev/dataset/23122023"
     },
     "model": {
-        "trainable_layers": "heads",
+        "trainable_layers": "all",
         "initialize_weight": "coco"
     },
     "params": {

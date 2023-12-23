@@ -68,13 +68,14 @@ def get_n_images(labels_dir: str):
 
         print(subset, " contains ", n_image, " images.")
 
-SUBSETS = ["test"]
+SUBSETS = ["train"]
 labels_dir = "./dataset/white_bg/labels"
 #check_no_skin_object(labels_dir)
-#get_n_images(labels_dir)
+get_n_images(labels_dir)
 
-
+"""
 check_duplicate_train_image(
     main_images_dir="./dataset/white_bg/images/test",
     another_images_dir="./dataset/white_bg/images/test"
 )
+"""
