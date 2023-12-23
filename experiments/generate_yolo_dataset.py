@@ -18,6 +18,9 @@ def convert(annotations: Dict[object, object], mask=False) -> None:
         image = Image.open(image_path)
         w_image, h_image = image.size
 
+        if len(metadata["regions"]) == 0:
+            continue
+
         for region in metadata["regions"]:
             all_points_x = region["shape_attributes"]["all_points_x"]
             all_points_y = region["shape_attributes"]["all_points_y"]
@@ -54,14 +57,14 @@ def convert(annotations: Dict[object, object], mask=False) -> None:
     print("Done.")
 
 
-SUBSET = "train"
-ANNOTATIONS_PATH = f"./dataset/label/fixed_train_augment/{SUBSET}.json"
-IMAGE_DIR = "./dataset/images"
-OUTPUT_DIR  = "./yolo_dataset_augment_2_classes_mask"
+SUBSET = "test"
+ANNOTATIONS_PATH = f"./dataset/white_bg/labels/test/{SUBSET}.json"
+IMAGE_DIR = "./dataset/white_bg/images/test"
+OUTPUT_DIR  = "./yolo_dataset_augment_3_classes_mask"
 CLASSES_MAP = {
     "skin"      : 0,
     "minor"     : 1,
-    "critical"  : 1
+    "critical"  : 2
 }
 
 image_output_dir = os.path.join(OUTPUT_DIR, "images", SUBSET)
