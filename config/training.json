@@ -1,6 +1,6 @@
 {
     "dataset": {
-        "dataset_dir": "/content/mask_rcnn_dev/dataset/23122023"
+        "dataset_dir": "/content/mask_rcnn_dev/dataset/resized"
     },
     "save_dir": "/content/drive/MyDrive/mask_rcnn_24122023",
     "model": {
