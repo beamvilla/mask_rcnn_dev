@@ -32,8 +32,37 @@ def box_iou_calc(boxes1: np.array, boxes2: np.array) -> np.array:
     return inter / (area1[:, None] + area2 - inter)  # iou = inter / (area1 + area2 - inter)
 
 
+def masks_iou_calc(label_masks: np.array, detection_masks: np.array) -> np.array:
+    # Sort predict masks
+    if detection_masks.shape[-1] == 0:
+       return 0
+    
+    # Reshape masks
+    reshaped_pred_masks = np.reshape(detection_masks, (-1, detection_masks.shape[-1])).astype(np.float32)
+    reshaped_gt_masks = np.reshape(label_masks, (-1, label_masks.shape[-1])).astype(np.float32)
+
+    # Calculate masks area
+    area_pred_masks = np.sum(reshaped_pred_masks, axis=0)
+    area_gt_masks = np.sum(reshaped_gt_masks, axis=0)
+
+    # Intersection masks
+    masks_intersections = np.dot(reshaped_pred_masks.T, reshaped_gt_masks)
+
+    # Union masks
+    union_masks = area_pred_masks[:, None] + area_gt_masks[None, :] - masks_intersections
+
+    # Mask overlap
+    masks_overlaps = masks_intersections / union_masks
+    return masks_overlaps
+
+
 class ConfusionMatrix:
-    def __init__(self, num_classes: int, conf_thres=0.3, iou_thres=0.5) -> None:
+    def __init__(
+        self, 
+        num_classes: int, 
+        conf_thres=0.3, 
+        iou_thres=0.5
+    ) -> None:
         self.matrix = np.zeros((num_classes + 1, num_classes + 1))
         self.num_classes = num_classes
         self.CONF_THRESHOLD = conf_thres
@@ -68,14 +97,16 @@ class ConfusionMatrix:
         """
         gt_classes = labels["classes"].astype(np.int16)
         gt_boxes = labels["boxes"]
-
+        gt_masks = labels["masks"]
 
         detection_boxes = detections["boxes"]
+        detection_masks = detections["masks"]
         detection_classes = detections["classes"].astype(np.int16)
         detection_conf = detections["conf"]
 
         try:
             detection_boxes = detection_boxes[detection_conf > self.CONF_THRESHOLD]
+            detection_masks = detection_masks[detection_conf > self.CONF_THRESHOLD]
             detection_classes = detection_classes[detection_conf > self.CONF_THRESHOLD]
             detection_conf = detection_conf[detection_conf > self.CONF_THRESHOLD]
         except IndexError or TypeError:
@@ -85,7 +116,11 @@ class ConfusionMatrix:
                 self.matrix[self.num_classes, gt_class] += 1
             return
 
-        all_ious = box_iou_calc(gt_boxes, detection_boxes)
+        if detection_type == "boxes":
+            all_ious = box_iou_calc(gt_boxes, detection_boxes)
+        elif detection_type == "masks":
+            all_ious = masks_iou_calc(gt_masks, detection_masks)
+
         want_idx = np.where(all_ious > self.IOU_THRESHOLD)
 
         all_matches = [[want_idx[0][i], want_idx[1][i], all_ious[want_idx[0][i], want_idx[1][i]]]
