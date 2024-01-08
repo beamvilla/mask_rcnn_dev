@@ -80,7 +80,7 @@ class ConfusionMatrix:
             detection_conf = detection_conf[detection_conf > self.CONF_THRESHOLD]
         except IndexError or TypeError:
             # detections are empty, end of process
-            for i, _ in enumerate(labels):
+            for i in range(len(gt_boxes)):
                 gt_class = gt_classes[i]
                 self.matrix[self.num_classes, gt_class] += 1
             return
@@ -101,7 +101,7 @@ class ConfusionMatrix:
 
             all_matches = all_matches[np.unique(all_matches[:, 0], return_index=True)[1]]
 
-        for i, _ in enumerate(labels):
+        for i in range(len(gt_boxes)):
             gt_class = gt_classes[i]
             if all_matches.shape[0] > 0 and all_matches[all_matches[:, 0] == i].shape[0] == 1:
                 detection_class = detection_classes[int(all_matches[all_matches[:, 0] == i, 1][0])]
