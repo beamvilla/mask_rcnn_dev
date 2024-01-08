@@ -66,7 +66,7 @@ class ConfusionMatrix:
         Returns:
             None, updates confusion matrix accordingly
         """
-        gt_classes = labels["class"].astype(np.int16)
+        gt_classes = labels["classes"].astype(np.int16)
 
         try:
             detections = detections[detections["conf"] > self.CONF_THRESHOLD]
