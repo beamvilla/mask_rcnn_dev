@@ -81,7 +81,6 @@ class ConfusionMatrix:
             detections:
                 {
                     "boxes": np.array([[x1, y1, x2, y2]]),
-                    "conf": np.array([float]),
                     "classes": np.array([int]),
                     "masks": np.array([[binary masks]])
                 }
@@ -102,14 +101,8 @@ class ConfusionMatrix:
         detection_boxes = detections["boxes"]
         detection_masks = detections["masks"]
         detection_classes = detections["classes"].astype(np.int16)
-        detection_conf = detections["conf"]
 
-        try:
-            detection_boxes = detection_boxes[detection_conf > self.CONF_THRESHOLD]
-            detection_masks = detection_masks[detection_conf > self.CONF_THRESHOLD]
-            detection_classes = detection_classes[detection_conf > self.CONF_THRESHOLD]
-            detection_conf = detection_conf[detection_conf > self.CONF_THRESHOLD]
-        except IndexError or TypeError:
+        if len(detection_boxes) == 0:
             # detections are empty, end of process
             for i in range(len(gt_boxes)):
                 gt_class = gt_classes[i]
