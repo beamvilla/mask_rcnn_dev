@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from typing import Dict
+from typing import Dict, List, Union
 
 
 def box_iou_calc(boxes1: np.array, boxes2: np.array) -> np.array:
@@ -39,20 +39,37 @@ class ConfusionMatrix:
         self.CONF_THRESHOLD = conf_thres
         self.IOU_THRESHOLD = iou_thres
 
-    def process_batch(self, detections: np.ndarray, labels: np.ndarray) -> None:
+    def process_batch(
+        self, 
+        detections: Dict[str, np.array], 
+        labels: Dict[str, np.array],
+        detection_type: str = "boxes"
+    ) -> None:
         """
         Return intersection-over-union (Jaccard index) of boxes.
         Both sets of boxes are expected to be in (x1, y1, x2, y2) format. >> int
         Arguments:
-            detections (Array[N, 6]), x1, y1, x2, y2, conf, class
-            labels (Array[M, 5]), class, x1, y1, x2, y2
+            detections:
+                {
+                    "boxes": np.array([[x1, y1, x2, y2]]),
+                    "conf": np.array([float]),
+                    "classes": np.array([int]),
+                    "masks": np.array([[binary masks]])
+                }
+            labels:
+                {
+                    "boxes": np.array([[x1, y1, x2, y2]]),
+                    "classes": np.array([int]),
+                    "masks": np.array([[binary masks]])
+                }
+
         Returns:
             None, updates confusion matrix accordingly
         """
-        gt_classes = labels[:, 0].astype(np.int16)
+        gt_classes = labels["class"].astype(np.int16)
 
         try:
-            detections = detections[detections[:, 4] > self.CONF_THRESHOLD]
+            detections = detections[detections["conf"] > self.CONF_THRESHOLD]
         except IndexError or TypeError:
             # detections are empty, end of process
             for i, _ in enumerate(labels):
@@ -60,9 +77,9 @@ class ConfusionMatrix:
                 self.matrix[self.num_classes, gt_class] += 1
             return
 
-        detection_classes = detections[:, 5].astype(np.int16)
+        detection_classes = detections["classes"].astype(np.int16)
 
-        all_ious = box_iou_calc(labels[:, 1:], detections[:, :4])
+        all_ious = box_iou_calc(labels["boxes"], detections["boxes"])
         want_idx = np.where(all_ious > self.IOU_THRESHOLD)
 
         all_matches = [[want_idx[0][i], want_idx[1][i], all_ious[want_idx[0][i], want_idx[1][i]]]

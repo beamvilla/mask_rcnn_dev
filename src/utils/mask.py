@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from typing import Tuple
+from typing import Tuple, List
 
   
 def plot_masks(
@@ -31,3 +31,19 @@ def rescale_mask(
         mask[:, 1] = mask[:, 1] * image_height
         mask.astype(int)
     return masks
+
+
+def polygon_to_binary_mask(
+    all_points_x: List[int], 
+    all_points_y: List[int],
+    height: int,
+    width: int
+) -> np.array:
+    area = []
+    for i in range(len(all_points_x)):
+        area.append([all_points_x[i], all_points_y[i]])
+    area = np.array(area)
+    mask = np.zeros((height, width))
+    cv2.fillPoly(mask, [area], 1)
+    mask = mask.astype(bool)
+    return mask
