@@ -104,6 +104,34 @@ def image_insight(dataset_dir: str):
                 if classes_obj_count[class_obj_name] > classes_obj_max[class_obj_name]:
                     classes_obj_max[class_obj_name] = classes_obj_count[class_obj_name]
     print(classes_obj_max)
+
+def check_img_size(dataset_dir: str):
+    width = []
+    height = []
+    for subset in SUBSETS:
+        for folder in os.listdir(dataset_dir):
+            folder_path = os.path.join(dataset_dir, folder)
+            if not Path(folder_path).is_dir():
+                continue
+
+            images_dir = os.path.join(folder_path, "images", subset)
+
+            for image_filename in tqdm(os.listdir(images_dir)):
+                image_path = os.path.join(images_dir, image_filename)
+                image = Image.open(image_path)
+                w, h= image.size
+                width.append(w)
+                height.append(h)
+    
+    print(sorted(width))
+    print(f"Max width : {max(width)}")
+    print(f"Min width : {min(width)}")
+    print(f"Mean width : {sum(width) / len(width)}\n")
+
+    print(sorted(height))
+    print(f"Max height : {max(height)}")
+    print(f"Min height : {min(height)}")
+    print(f"Mean height : {sum(height) / len(height)}\n")
                 
 
 SUBSETS = ["train", "test", "val"]
@@ -118,4 +146,5 @@ check_duplicate_train_image(
 )
 """
 
-image_insight("./dataset/23122023")
+#image_insight("./dataset/23122023")
+check_img_size("./only_defect")

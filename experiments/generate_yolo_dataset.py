@@ -25,9 +25,6 @@ def convert(
         image = Image.open(image_path)
         w_image, h_image = image.size
 
-        if len(metadata["regions"]) == 0:
-            continue
-
         for region in metadata["regions"]:
             all_points_x = region["shape_attributes"]["all_points_x"]
             all_points_y = region["shape_attributes"]["all_points_y"]
@@ -65,12 +62,11 @@ def convert(
 
 
 SUBSETS = ["train", "val", "test"]
-DATASET_DIR = "./dataset/resized/"
-OUTPUT_DIR  = "./yolo_dataset_augment_3_classes_mask"
+DATASET_DIR = "./only_defect"
+OUTPUT_DIR  = "./yolo_only_defect"
 CLASSES_MAP = {
-    "skin"      : 0,
-    "minor"     : 1,
-    "critical"  : 2
+    "minor"     : 0,
+    "critical"  : 1
 }
 
 for subset in SUBSETS:
@@ -89,8 +85,12 @@ for subset in SUBSETS:
     
         images_dir = os.path.join(folder_path, "images", subset)
         labels_dir = os.path.join(folder_path, "labels", subset)
+        label_path = os.path.join(labels_dir, f"{subset}.json")
 
-        annotations = load_json_file(os.path.join(labels_dir, f"{subset}.json"))["_via_img_metadata"]
+        if not os.path.exists(label_path):
+            continue
+
+        annotations = load_json_file(label_path)["_via_img_metadata"]
         convert(
             annotations=annotations, 
             images_dir=images_dir,
