@@ -67,9 +67,17 @@ class ConfusionMatrix:
             None, updates confusion matrix accordingly
         """
         gt_classes = labels["classes"].astype(np.int16)
+        gt_boxes = labels["boxes"]
+
+
+        detection_boxes = detections["boxes"]
+        detection_classes = detections["classes"].astype(np.int16)
+        detection_conf = detections["conf"]
 
         try:
-            detections = detections[detections["conf"] > self.CONF_THRESHOLD]
+            detection_boxes = detection_boxes[detection_conf > self.CONF_THRESHOLD]
+            detection_classes = detection_classes[detection_conf > self.CONF_THRESHOLD]
+            detection_conf = detection_conf[detection_conf > self.CONF_THRESHOLD]
         except IndexError or TypeError:
             # detections are empty, end of process
             for i, _ in enumerate(labels):
@@ -77,9 +85,7 @@ class ConfusionMatrix:
                 self.matrix[self.num_classes, gt_class] += 1
             return
 
-        detection_classes = detections["classes"].astype(np.int16)
-
-        all_ious = box_iou_calc(labels["boxes"], detections["boxes"])
+        all_ious = box_iou_calc(gt_boxes, detection_boxes)
         want_idx = np.where(all_ious > self.IOU_THRESHOLD)
 
         all_matches = [[want_idx[0][i], want_idx[1][i], all_ious[want_idx[0][i], want_idx[1][i]]]
@@ -103,7 +109,7 @@ class ConfusionMatrix:
             else:
                 self.matrix[self.num_classes, gt_class] += 1
 
-        for i, _ in enumerate(detections):
+        for i, _ in enumerate(detection_boxes):
             if not all_matches.shape[0] or (all_matches.shape[0] and all_matches[all_matches[:, 1] == i].shape[0] == 0):
                 detection_class = detection_classes[i]
                 self.matrix[detection_class, self.num_classes] += 1
