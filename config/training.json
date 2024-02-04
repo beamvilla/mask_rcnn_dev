@@ -2,15 +2,15 @@
     "dataset": {
         "dataset_dir": "/content/mask_rcnn_dev/dataset/resized"
     },
-    "save_dir": "/content/drive/MyDrive/mask_rcnn_24122023",
+    "save_dir": "/content/drive/MyDrive/mask_rcnn_05022024",
     "model": {
         "trainable_layers": "all",
         "initialize_weight": "coco"
     },
     "params": {
-        "epochs": 10,
+        "epochs": 30,
 	    "early_stopping_monitor": "val_loss",
-        "early_stopping_patience": 5,
+        "early_stopping_patience": 10,
         "early_stopping_mode": "min",
         "model_checkpoint_monitor": "val_loss",
         "model_checkpoint_mode": "min"
