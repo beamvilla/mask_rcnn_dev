@@ -24,6 +24,7 @@ import tensorflow.keras.utils as KU
 from tensorflow.python.eager import context
 import tensorflow.keras.models as KM
 
+
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../")
 
@@ -2462,7 +2463,7 @@ class MaskRCNN():
         checkpoint = os.path.join(dir_name, checkpoints[-1])
         return dir_name, checkpoint
 
-    def load_weights(self, filepath, by_name=True, exclude=None):
+    def load_weights(self, filepath, by_name=False, exclude=None):
         import h5py
         from tensorflow.python.keras.saving import hdf5_format
 
@@ -2471,26 +2472,25 @@ class MaskRCNN():
 
         if h5py is None:
             raise ImportError("`load_weights` requires h5py.")
-        f = h5py.File(filepath, mode='r')
-        if "layer_names" not in f.attrs and "model_weights" in f:
-            f = f["model_weights"]
+        
+        with h5py.File(filepath, mode='r') as f:
+            if 'layer_names' not in f.attrs and 'model_weights' in f:
+                f = f['model_weights']
 
-        # In multi-GPU training, we wrap the model. Get layers
-        # of the inner model because they have the weights.
-        keras_model = self.keras_model
-        layers = keras_model.inner_model.layers if hasattr(keras_model, "inner_model")\
-            else keras_model.layers
+            # In multi-GPU training, we wrap the model. Get layers
+            # of the inner model because they have the weights.
+            keras_model = self.keras_model
+            layers = keras_model.inner_model.layers if hasattr(keras_model, "inner_model")\
+                else keras_model.layers
 
-        # Exclude some layers
-        if exclude:
-            layers = filter(lambda l: l.name not in exclude, layers)
+            # Exclude some layers
+            if exclude:
+                layers = filter(lambda l: l.name not in exclude, layers)
 
-        if by_name:
-            hdf5_format.load_weights_from_hdf5_group_by_name(f, layers)
-        else:
-            hdf5_format.load_weights_from_hdf5_group(f, layers)
-        if hasattr(f, "close"):
-            f.close()
+            if by_name:
+                hdf5_format.load_weights_from_hdf5_group_by_name(f, layers)
+            else:
+                hdf5_format.load_weights_from_hdf5_group(f, layers)
 
         # Update the log directory
         self.set_log_dir(filepath)
