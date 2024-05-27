@@ -24,6 +24,7 @@ import tensorflow.keras.utils as KU
 from tensorflow.python.eager import context
 import tensorflow.keras.models as KM
 
+
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../")
 
@@ -1029,7 +1030,7 @@ def refine_detections_graph(rois, probs, deltas, window, config):
     # Filter out low confidence boxes
     if config.DETECTION_MIN_CONFIDENCE:
         conf_keep = tf.compat.v1.where(class_scores >= config.DETECTION_MIN_CONFIDENCE)[:, 0]
-        keep = tf.sets.set_intersection(tf.expand_dims(keep, 0),
+        keep = tf.sets.intersection(tf.expand_dims(keep, 0),
                                         tf.expand_dims(conf_keep, 0))
         keep = tf.sparse.to_dense(keep)[0]
 
@@ -1069,7 +1070,7 @@ def refine_detections_graph(rois, probs, deltas, window, config):
     nms_keep = tf.gather(nms_keep, tf.compat.v1.where(nms_keep > -1)[:, 0])
     
     # 4. Compute intersection between keep and nms_keep
-    keep = tf.sets.set_intersection(tf.expand_dims(keep, 0),
+    keep = tf.sets.intersection(tf.expand_dims(keep, 0),
                                     tf.expand_dims(nms_keep, 0))
     keep = tf.sparse.to_dense(keep)[0]
     
@@ -1640,7 +1641,7 @@ def load_image_gt(dataset, config, image_id, augment=False, augmentation=None,
     active_class_ids[source_class_ids] = 1
 
     # Resize masks to smaller size to reduce memory usage
-    if use_mini_mask:
+    if config.USE_MINI_MASK:
         mask = utils.minimize_mask(bbox, mask, config.MINI_MASK_SHAPE)
 
     # Image meta data
@@ -2462,7 +2463,7 @@ class MaskRCNN():
         checkpoint = os.path.join(dir_name, checkpoints[-1])
         return dir_name, checkpoint
 
-    def load_weights(self, filepath, by_name=True, exclude=None):
+    def load_weights(self, filepath, by_name=False, exclude=None):
         import h5py
         from tensorflow.python.keras.saving import hdf5_format
 
@@ -2471,26 +2472,25 @@ class MaskRCNN():
 
         if h5py is None:
             raise ImportError("`load_weights` requires h5py.")
-        f = h5py.File(filepath, mode='r')
-        if "layer_names" not in f.attrs and "model_weights" in f:
-            f = f["model_weights"]
+        
+        with h5py.File(filepath, mode='r') as f:
+            if 'layer_names' not in f.attrs and 'model_weights' in f:
+                f = f['model_weights']
 
-        # In multi-GPU training, we wrap the model. Get layers
-        # of the inner model because they have the weights.
-        keras_model = self.keras_model
-        layers = keras_model.inner_model.layers if hasattr(keras_model, "inner_model")\
-            else keras_model.layers
+            # In multi-GPU training, we wrap the model. Get layers
+            # of the inner model because they have the weights.
+            keras_model = self.keras_model
+            layers = keras_model.inner_model.layers if hasattr(keras_model, "inner_model")\
+                else keras_model.layers
 
-        # Exclude some layers
-        if exclude:
-            layers = filter(lambda l: l.name not in exclude, layers)
+            # Exclude some layers
+            if exclude:
+                layers = filter(lambda l: l.name not in exclude, layers)
 
-        if by_name:
-            hdf5_format.load_weights_from_hdf5_group_by_name(f, layers)
-        else:
-            hdf5_format.load_weights_from_hdf5_group(f, layers)
-        if hasattr(f, "close"):
-            f.close()
+            if by_name:
+                hdf5_format.load_weights_from_hdf5_group_by_name(f, layers)
+            else:
+                hdf5_format.load_weights_from_hdf5_group(f, layers)
 
         # Update the log directory
         self.set_log_dir(filepath)

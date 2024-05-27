@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from typing import Dict
+from typing import Dict, List, Union
 
 
 def box_iou_calc(boxes1: np.array, boxes2: np.array) -> np.array:
@@ -33,36 +33,57 @@ def box_iou_calc(boxes1: np.array, boxes2: np.array) -> np.array:
 
 
 class ConfusionMatrix:
-    def __init__(self, num_classes: int, conf_thres=0.3, iou_thres=0.5) -> None:
+    def __init__(
+        self, 
+        num_classes: int, 
+        conf_thres=0.3, 
+        iou_thres=0.5
+    ) -> None:
         self.matrix = np.zeros((num_classes + 1, num_classes + 1))
         self.num_classes = num_classes
         self.CONF_THRESHOLD = conf_thres
         self.IOU_THRESHOLD = iou_thres
 
-    def process_batch(self, detections: np.ndarray, labels: np.ndarray) -> None:
+    def process_batch(
+        self, 
+        detections: Dict[str, np.array], 
+        labels: Dict[str, np.array]
+    ) -> None:
         """
         Return intersection-over-union (Jaccard index) of boxes.
         Both sets of boxes are expected to be in (x1, y1, x2, y2) format. >> int
         Arguments:
-            detections (Array[N, 6]), x1, y1, x2, y2, conf, class
-            labels (Array[M, 5]), class, x1, y1, x2, y2
+            detections:
+                {
+                    "boxes": np.array([[x1, y1, x2, y2]]),
+                    "classes": np.array([int]),
+                    "masks": np.array([[binary masks]])
+                }
+            labels:
+                {
+                    "boxes": np.array([[x1, y1, x2, y2]]),
+                    "classes": np.array([int]),
+                    "masks": np.array([[binary masks]])
+                }
+
         Returns:
             None, updates confusion matrix accordingly
         """
-        gt_classes = labels[:, 0].astype(np.int16)
+        gt_classes = labels["classes"].astype(np.int16)
+        gt_boxes = labels["boxes"]
+    
+        detection_boxes = detections["boxes"]
+        detection_classes = detections["classes"].astype(np.int16)
 
-        try:
-            detections = detections[detections[:, 4] > self.CONF_THRESHOLD]
-        except IndexError or TypeError:
+        if len(detection_boxes) == 0:
             # detections are empty, end of process
-            for i, _ in enumerate(labels):
+            for i in range(len(gt_boxes)):
                 gt_class = gt_classes[i]
                 self.matrix[self.num_classes, gt_class] += 1
             return
 
-        detection_classes = detections[:, 5].astype(np.int16)
+        all_ious = box_iou_calc(gt_boxes, detection_boxes)
 
-        all_ious = box_iou_calc(labels[:, 1:], detections[:, :4])
         want_idx = np.where(all_ious > self.IOU_THRESHOLD)
 
         all_matches = [[want_idx[0][i], want_idx[1][i], all_ious[want_idx[0][i], want_idx[1][i]]]
@@ -78,7 +99,7 @@ class ConfusionMatrix:
 
             all_matches = all_matches[np.unique(all_matches[:, 0], return_index=True)[1]]
 
-        for i, _ in enumerate(labels):
+        for i in range(len(gt_boxes)):
             gt_class = gt_classes[i]
             if all_matches.shape[0] > 0 and all_matches[all_matches[:, 0] == i].shape[0] == 1:
                 detection_class = detection_classes[int(all_matches[all_matches[:, 0] == i, 1][0])]
@@ -86,7 +107,7 @@ class ConfusionMatrix:
             else:
                 self.matrix[self.num_classes, gt_class] += 1
 
-        for i, _ in enumerate(detections):
+        for i, _ in enumerate(detection_boxes):
             if not all_matches.shape[0] or (all_matches.shape[0] and all_matches[all_matches[:, 1] == i].shape[0] == 0):
                 detection_class = detection_classes[i]
                 self.matrix[detection_class, self.num_classes] += 1

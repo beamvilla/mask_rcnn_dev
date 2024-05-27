@@ -6,6 +6,7 @@ import json
 import skimage.draw
 import numpy as np
 from typing import Dict
+from pathlib import Path
 
 from src.mrcnn import utils
 
@@ -14,45 +15,53 @@ class CustomDataset(utils.Dataset):
     def load_custom(
         self, 
         dataset_dir: str, 
-        annotation_path: str, 
+        subset: str, 
         classes_map: Dict[str, int]
     ) -> None:
         cnt_classes = {}
         for class_name, class_id in classes_map.items():
             cnt_classes[class_name] = 0
             self.add_class("object", class_id, class_name)
+
+        for folder in os.listdir(dataset_dir):
+            folder_path = os.path.join(dataset_dir, folder)
+            _folder_path = Path(folder_path)
+
+            if not _folder_path.is_dir():
+                continue
+
+            annotation_path = os.path.join(folder_path, "labels", subset, f"{subset}.json")
         
-        with open(annotation_path) as annoFile:
-            annotations = json.load(annoFile)
+            with open(annotation_path) as annoFile:
+                annotations = json.load(annoFile)
 
-        img_metadata = annotations["_via_img_metadata"]
+            img_metadata = annotations["_via_img_metadata"]
 
-        # Add images
-        for _, metadata in img_metadata.items():
-            num_ids = []
-            polygons = []
-            image_file_name = metadata["filename"]
-            regions = metadata["regions"]
+            # Add images
+            for _, metadata in img_metadata.items():
+                num_ids = []
+                polygons = []
+                image_file_name = metadata["filename"]
+                regions = metadata["regions"]
 
-            for region in regions:
-                polygons.append(region["shape_attributes"])
-                for region_attr in region["region_attributes"].values():
-                    cnt_classes[region_attr] += 1
-                    num_ids.append(classes_map[region_attr])
+                for region in regions:
+                    polygons.append(region["shape_attributes"])
+                    for region_attr in region["region_attributes"].values():
+                        cnt_classes[region_attr] += 1
+                        num_ids.append(classes_map[region_attr])
 
-            image_path = os.path.join(dataset_dir, image_file_name)
-            image = skimage.io.imread(image_path)
-            height, width = image.shape[:2]
+                image_path = os.path.join(folder_path, "images", subset, image_file_name)
+                image = skimage.io.imread(image_path)
+                height, width = image.shape[:2]
 
-            self.add_image(
-                "object",
-                image_id=image_file_name,  # use file name as a unique image id
-                path=image_path,
-                width=width, height=height,
-                polygons=polygons,
-                num_ids=num_ids
-            )
-            
+                self.add_image(
+                    "object",
+                    image_id=image_file_name,  # use file name as a unique image id
+                    path=image_path,
+                    width=width, height=height,
+                    polygons=polygons,
+                    num_ids=num_ids
+                )       
         print(cnt_classes)
 
     def load_mask(self, image_id):

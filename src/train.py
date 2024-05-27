@@ -23,7 +23,7 @@ def train():
         weight_type = training_config.INITIALIZE_WEIGHT
 
     train_model_time = datetime.strftime(datetime.now() + timedelta(hours=7),"%Y%m%d_%H%M%S")
-    save_trained_model_dir = os.path.join(dir_path, f"trained_models/{train_model_time}")
+    save_trained_model_dir = os.path.join(training_config.SAVE_DIR, f"trained_models/{train_model_time}")
     checkpoint_name = f"{mrcnn_config.BACKBONE}_{weight_type}_{training_config.TRAINABLE_LAYERS}_{train_model_time}"
     save_history_path = f"{save_trained_model_dir}/{checkpoint_name}.csv"
     checkpoint_path = f"{save_trained_model_dir}/{checkpoint_name}"
@@ -33,15 +33,13 @@ def train():
 
     ## ======================= PREPARE DATASET =======================
     # Training dataset.
-    label_path = training_config.LABEL_PATH
-
     dataset_train = CustomDataset()
-    dataset_train.load_custom(training_config.DATASET_DIR, label_path["train"], classes_map)
+    dataset_train.load_custom(training_config.DATASET_DIR, "train", classes_map)
     dataset_train.prepare()
 
     # Validation dataset
     dataset_val = CustomDataset()
-    dataset_val.load_custom(training_config.DATASET_DIR, label_path["val"], classes_map)
+    dataset_val.load_custom(training_config.DATASET_DIR, "val", classes_map)
     dataset_val.prepare()
 
     ## ======================= CALLBACKS =======================

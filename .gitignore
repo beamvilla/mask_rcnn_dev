@@ -1,4 +1,5 @@
 *.jpg
+*.jpeg
 *.png
 *.csv
 *.json
@@ -12,3 +13,4 @@ manual_pipline.py
 *.zip
 *.deb
 *.txt
+*.xlsx

@@ -28,6 +28,7 @@ weight_dir = "/".join(weight_path.split("/")[:-1])
 eval_config_path = os.path.join(weight_dir, "config", "eval.json")
 mrcnn_config_path = os.path.join(weight_dir, "config", "mrcnn_config.json")
 
+"""
 ## Evaluate
 eval(
         weight_path=weight_path,
@@ -35,4 +36,6 @@ eval(
         eval_config_path=eval_config_path,
         mrcnn_config_path=mrcnn_config_path
     )
+"""
+
 print("Finished.")

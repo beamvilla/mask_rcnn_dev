@@ -1,6 +1,7 @@
 from PIL import Image
 import sys
 import os
+from pathlib import Path
 from typing import Dict
 from tqdm import tqdm
 
@@ -10,16 +11,19 @@ from src.utils.bbox import polygon_to_rect
 from src.utils.file_manager import load_json_file, write_text_lines_file
 
 
-def convert(annotations: Dict[object, object], mask=False) -> None:
-    for image_meta, metadata in tqdm(annotations.items()):
+def convert(
+    annotations: Dict[object, object], 
+    images_dir: str,
+    image_output_dir: str,
+    label_output_dir: str,
+    mask=False
+) -> None:
+    for _, metadata in tqdm(annotations.items()):
         labels = []
-        image_path = os.path.join(IMAGE_DIR, metadata["filename"])
+        image_path = os.path.join(images_dir, metadata["filename"])
         image_name = metadata["filename"].split(".")[0]
         image = Image.open(image_path)
         w_image, h_image = image.size
-
-        if len(metadata["regions"]) == 0:
-            continue
 
         for region in metadata["regions"]:
             all_points_x = region["shape_attributes"]["all_points_x"]
@@ -57,24 +61,40 @@ def convert(annotations: Dict[object, object], mask=False) -> None:
     print("Done.")
 
 
-SUBSET = "test"
-ANNOTATIONS_PATH = f"./dataset/white_bg/labels/test/{SUBSET}.json"
-IMAGE_DIR = "./dataset/white_bg/images/test"
-OUTPUT_DIR  = "./yolo_dataset_augment_3_classes_mask"
+SUBSETS = ["train", "val", "test"]
+DATASET_DIR = "./only_defect"
+OUTPUT_DIR  = "./yolo_only_defect"
 CLASSES_MAP = {
-    "skin"      : 0,
-    "minor"     : 1,
-    "critical"  : 2
+    "minor"     : 0,
+    "critical"  : 1
 }
 
-image_output_dir = os.path.join(OUTPUT_DIR, "images", SUBSET)
-label_output_dir = os.path.join(OUTPUT_DIR, "labels", SUBSET)
+for subset in SUBSETS:
+    image_output_dir = os.path.join(OUTPUT_DIR, "images", subset)
+    label_output_dir = os.path.join(OUTPUT_DIR, "labels", subset)
 
-if not os.path.exists(image_output_dir):
-    os.makedirs(image_output_dir)
+    for o in [image_output_dir, label_output_dir]:
+        if not os.path.exists(o):
+            os.makedirs(o)
+    
+    for folder in os.listdir(DATASET_DIR):
+        folder_path = os.path.join(DATASET_DIR, folder)
 
-if not os.path.exists(label_output_dir):
-    os.makedirs(label_output_dir) 
+        if not Path(folder_path).is_dir():
+            continue
+    
+        images_dir = os.path.join(folder_path, "images", subset)
+        labels_dir = os.path.join(folder_path, "labels", subset)
+        label_path = os.path.join(labels_dir, f"{subset}.json")
 
-annotations = load_json_file(ANNOTATIONS_PATH)["_via_img_metadata"]
-convert(annotations=annotations, mask=True)
+        if not os.path.exists(label_path):
+            continue
+
+        annotations = load_json_file(label_path)["_via_img_metadata"]
+        convert(
+            annotations=annotations, 
+            images_dir=images_dir,
+            label_output_dir=label_output_dir,
+            image_output_dir=image_output_dir,
+            mask=True
+        )
