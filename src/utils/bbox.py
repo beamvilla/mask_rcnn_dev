@@ -147,3 +147,8 @@ def extract_label_items(
             x, y, w, h = polygon_to_rect(polygon_x=_x, polygon_y=_y)
             boxes.append([x, y, w, h])
     return class_ids, segmentations, boxes
+
+
+def xywh_to_x1y1x2y2(xywh_bbox: Tuple[int, int, int, int]) -> Tuple[int, int, int, int]:
+    x, y, w, h = xywh_bbox
+    return x, y, x + w, y + h
