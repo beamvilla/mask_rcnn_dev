@@ -31,7 +31,7 @@ for sub_dir in sub_dirs:
             y = region["shape_attributes"]["all_points_y"]
             class_name = list(region["region_attributes"].values())[0]
 
-            if class_name == "critical":
+            if class_name == "minor":
                 bbox = polygon_to_rect(polygon_x=x, polygon_y=y)  # x, y, w, h
                 bbox = xywh_to_x1y1x2y2(bbox)
                 redefined_bboxes.append(bbox)
@@ -39,7 +39,7 @@ for sub_dir in sub_dirs:
 
 # Start clusering
 redefined_bboxes = torch.tensor(redefined_bboxes, dtype=torch.float)
-anchors, distances = KMeans(redefined_bboxes, k=5)
+anchors, distances = KMeans(redefined_bboxes, k=5, stop_iter=100)
 anchors_width_height_cluster = []
 
 for anchor in anchors:
