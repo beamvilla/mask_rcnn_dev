@@ -54,3 +54,11 @@ def get_redefined_bbox(
         bbox = [bbox[0], bbox[1] + height1, bbox[2], bbox[3] + height2]
     
     return bbox
+
+def get_mask_rcnn_anchors(anchor_w: List[int], ratio: List[float]) -> List[float]:
+  mask_rcnn_anchors = []
+  for w in anchor_w:
+    for r in ratio:
+      h = w * r
+      mask_rcnn_anchors.append([w, h])
+  return mask_rcnn_anchors
