@@ -53,11 +53,12 @@ def generate_redefine_bbox(
 # Start clusering
 redefined_bboxes = generate_redefine_bbox(target_obj_number=None)
 redefined_bboxes = torch.tensor(redefined_bboxes, dtype=torch.float)
-anchors, distances = KMeans_clustering_anchor_boxes(redefined_bboxes, k=15, stop_iter=5)
+anchors, distances = KMeans_clustering_anchor_boxes(redefined_bboxes, k=9, stop_iter=5)
 anchors_width_height_cluster = []
 
 for anchor in anchors:
     x1, y1, x2, y2 = anchor.tolist()
     anchors_width_height_cluster.append([int(x2 - x1), int(y2 - y1)])
 
+anchors_width_height_cluster = sorted(anchors_width_height_cluster, key=lambda x: x[0] * x[1])
 print(anchors_width_height_cluster)

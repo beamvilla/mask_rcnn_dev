@@ -9,6 +9,7 @@ from .distance_function import IoU
 SOURCE: https://medium.com/@yerdaulet.zhumabay/generating-anchor-boxes-by-k-means-82f11c690b82
 """
 def KMeans_clustering_anchor_boxes(bboxes: torch.tensor, k: int, stop_iter: int = 5):
+    # bboxes: x1, y1, x2, y2
     pbar = tqdm(total=stop_iter)
     rows = bboxes.shape[0]
     distances = torch.empty((rows, k))
@@ -20,10 +21,10 @@ def KMeans_clustering_anchor_boxes(bboxes: torch.tensor, k: int, stop_iter: int 
     iteration = 0
     while True:
         # calculate the distances 
-        distances = IoU(bboxes, clusters)
+        distances = IoU(clusters=clusters, bboxes=bboxes)
 
         nearest_clusters = torch.argmax(distances, dim=1) # 0, 1, 2 ... K   
-       
+        
         if (last_clusters == nearest_clusters).all(): # break if nothing changes
             iteration += 1
             if iteration == stop_iter:
